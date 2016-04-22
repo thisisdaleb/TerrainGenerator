@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 
 [ExecuteInEditMode]
-public class InterpolationTiny : MonoBehaviour
+public class BrokeInterpolationTiny : MonoBehaviour
 {
 	bool runNow;
 	bool extraRun = true;
@@ -158,7 +158,7 @@ public class InterpolationTiny : MonoBehaviour
 
 		//In this Tiny version, only the mat32 will be used.
 		for (int y = 0; y < length-1; y++) {
-			for (int x = 0; x < width-2; x++) {
+			for (int x = 0; x < width-1; x++) {
 				if (y % 64 == 0) {
 					if (x % 64 == 0)
 						finalHeightMap [y, x] += (float)(noiseMat [3] [y / 64, x / 64]);
@@ -167,10 +167,9 @@ public class InterpolationTiny : MonoBehaviour
 						firstNumber = noiseMat [3] [y / 64, x / 64];
 						secondNumber = noiseMat [3] [(y / 64), (x / 64) + 1];
 						distanceBetween = (x % 64) / 64f;
-						finalHeightMap [y, x] = Interpolate (firstNumber, secondNumber, distanceBetween);
+						finalHeightMap [y, x] += LinearInterpolate (firstNumber, secondNumber, distanceBetween);
 					}
 				}
-				finalHeightMap [y, x] = (float)Math.Abs (finalHeightMap [y, x]);
 
 				if (finalHeightMap [y, x] > max)
 					max = finalHeightMap [y, x];
@@ -180,16 +179,15 @@ public class InterpolationTiny : MonoBehaviour
 		}
 
 
-		for (int y = 0; y < length-2; y++) {
+		for (int y = 0; y < length-1; y++) {
 			for (int x = 0; x < width-1; x++) {
-				if (y % 64 != 0 && (y/64)<31) {
+				if (y % 64 != 0 && x % 64 != 0 && (y/64)<31) {
 					//interpolate
 					firstNumber = noiseMat [3] [y / 64, x / 64];
 					secondNumber = noiseMat [3] [(y / 64) + 1, (x / 64)];
 					distanceBetween = (y % 64) / 64f;
-					finalHeightMap [y, x] = Interpolate (firstNumber, secondNumber, distanceBetween);
+					finalHeightMap [y, x] += LinearInterpolate (firstNumber, secondNumber, distanceBetween);
 				}
-				finalHeightMap [y, x] = (float)Math.Abs (finalHeightMap [y, x]);
 
 				if (finalHeightMap [y, x] > max)
 					max = finalHeightMap [y, x];
@@ -199,7 +197,7 @@ public class InterpolationTiny : MonoBehaviour
 		}
 
 		min = Math.Abs (min); 
-		
+
 		for (int y = 0; y < length-1; y++) {
 			for (int x = 0; x < width-1; x++) {
 				finalHeightMap [y, x] = (finalHeightMap [y, x] + min) / (max + min);
@@ -227,7 +225,7 @@ public class InterpolationTiny : MonoBehaviour
 
 	//inputs A and B are the numbers that are being interpolated between.
 	//X is the fraction of difference between A and B.
-	private float SmoothInterpolate (float a, float b, float x)
+	private float Interpolate (float a, float b, float x)
 	{
 		float ft = x * 3.1415927f;
 		float f = (float)(1 - Math.Cos (ft)) * 0.5f;
@@ -235,21 +233,7 @@ public class InterpolationTiny : MonoBehaviour
 		return  (float)(a * (1 - f) + b * f);
 	}
 
-	private float Interpolate(float a, float b, float x){
+	private float LinearInterpolate(float a, float b, float x){
 		return a*(1f-x) + b*x;
 	}
-
-
-	/*Bilinear Interpolation
-	 float fractionX = ... //the fraction part of the x coordinate
-	float integerX = ... //the integer part of the x coordinate
-	float fractionY, integerY = ...
-	interpolatedValue = (1 - fractionX) * 
-                        ((1 - fractionY) * data[integerX, integerY] + 
-                         fractionY * data[integerX, integerY + 1]) + 
-                    fractionX * 
-                        ((1 - fractionY) * data[integerX + 1, integerY] + 
-                        fractionY * data[integerX + 1, integerY + 1]);
-*/
-
 }
