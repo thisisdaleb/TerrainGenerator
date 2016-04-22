@@ -4,11 +4,11 @@ using System;
 using System.Collections.Generic;
 
 [ExecuteInEditMode]
-public class CityTerrain : MonoBehaviour {
+public class NoInterpolationTerrain : MonoBehaviour {
 	bool runNow;
 	bool extraRun = true;
 	private int[,] initColorMap;
-	private int width = 2049; //These 2 defined by input! Each terrain 4097 pixels wide and long
+	private int width = 4097; //These 2 defined by input! Each terrain 4097 pixels wide and long
 	private int length; //Input is amount of tiles in width and length (Ex: 2x3 tiles)
 	private float[,] finalHeightMap; //defines the elevation of each height point between 0.0 and 1.0
 	private int terrainWidth = 1000; //defines the width of the terrain in meters
@@ -29,10 +29,10 @@ public class CityTerrain : MonoBehaviour {
 	void Start () {
 		length = width;
 		runNow = true;
-		matSizes = new int[10];
+		matSizes = new int[11];
 		for (int mats = 0; mats < (matSizes.Length); mats++) 
 		{
-			matSizes[mats]=8*((int)Math.Pow(2, mats));
+			matSizes[mats]=4*((int)Math.Pow(2, mats));
 		}
 	}
 	
@@ -132,7 +132,7 @@ public class CityTerrain : MonoBehaviour {
 	{
 		noiseMat = new List<float[,]>();
 
-		for (int noiseNumber= 0; noiseNumber<8; noiseNumber++) 
+		for (int noiseNumber= 0; noiseNumber<11; noiseNumber++) 
 		{
 			simplex = new SimplexNoiseGenerator ((long)(UnityEngine.Random.Range (int.MinValue, int.MaxValue)));
 			noiseMat.Add(new float[matSizes[noiseNumber],matSizes[noiseNumber]]);
@@ -162,36 +162,28 @@ public class CityTerrain : MonoBehaviour {
 				//decrease the amount of streets
 				//modulus x and y (first 2 statements) by a larger number to:
 				//decrease the size of the streets
-				if((x/8)%32==0 || (y/8)%32==0 || x%8==0 || x%8==1 || y%8==0 || y%8==1)
-				{
-					finalHeightMap[y, x] = 0f;
-				}
-				else{
-					//These all use noise to create the buildings
-					finalHeightMap[y,x]  = (float)(noiseMat[0][y/(length/noiseMat[0].GetLength(0)), x/(width/noiseMat[0].GetLength(0))]);
-					finalHeightMap[y,x] += (float)(noiseMat[1][y/(length/noiseMat[1].GetLength(0)), x/(width/noiseMat[1].GetLength(0))]/2);
-					finalHeightMap[y,x] += (float)(noiseMat[2][y/(length/noiseMat[2].GetLength(0)), x/(width/noiseMat[2].GetLength(0))]/4);
-					finalHeightMap[y,x] += (float)(noiseMat[3][y/(length/noiseMat[3].GetLength(0)), x/(width/noiseMat[3].GetLength(0))]/6);
-					if(width>600)
-						finalHeightMap[y,x] += (float)(noiseMat[4][y/(length/noiseMat[4].GetLength(0)), x/(width/noiseMat[4].GetLength(0))]/8);
-					if(width>1100)
-						finalHeightMap[y,x] += (float)(noiseMat[5][y/(length/noiseMat[5].GetLength(0)), x/(width/noiseMat[5].GetLength(0))]/12);
-					if(width>2100)
-						finalHeightMap[y,x] += (float)(noiseMat[6][y/(length/noiseMat[6].GetLength(0)), x/(width/noiseMat[6].GetLength(0))]/16);
-					if(width>4100)
-						finalHeightMap[y,x] += (float)(noiseMat[7][y/(length/noiseMat[7].GetLength(0)), x/(width/noiseMat[7].GetLength(0))]/20);
+				//These all use noise to create the buildings
+				finalHeightMap[y,x]  = (float)(noiseMat[0][y/(length/noiseMat[0].GetLength(0)), x/(width/noiseMat[0].GetLength(0))]);
+				finalHeightMap[y,x] += (float)(noiseMat[1][y/(length/noiseMat[1].GetLength(0)), x/(width/noiseMat[1].GetLength(0))]/2);
+				finalHeightMap[y,x] += (float)(noiseMat[2][y/(length/noiseMat[2].GetLength(0)), x/(width/noiseMat[2].GetLength(0))]/4);
+				finalHeightMap[y,x] += (float)(noiseMat[3][y/(length/noiseMat[3].GetLength(0)), x/(width/noiseMat[3].GetLength(0))]/8);
+				finalHeightMap[y,x] += (float)(noiseMat[4][y/(length/noiseMat[4].GetLength(0)), x/(width/noiseMat[4].GetLength(0))]/16);
+				finalHeightMap[y,x] += (float)(noiseMat[5][y/(length/noiseMat[5].GetLength(0)), x/(width/noiseMat[5].GetLength(0))]/32);
+				if(width>250)
+					finalHeightMap[y,x] += (float)(noiseMat[6][y/(length/noiseMat[6].GetLength(0)), x/(width/noiseMat[6].GetLength(0))]/64);
+				if(width>500)
+					finalHeightMap[y,x] += (float)(noiseMat[7][y/(length/noiseMat[7].GetLength(0)), x/(width/noiseMat[7].GetLength(0))]/64);
+				if(width>1000)
+					finalHeightMap[y,x] += (float)(noiseMat[8][y/(length/noiseMat[8].GetLength(0)), x/(width/noiseMat[8].GetLength(0))]/128);
+				if(width>2000)
+					finalHeightMap[y,x] += (float)(noiseMat[9][y/(length/noiseMat[9].GetLength(0)), x/(width/noiseMat[9].GetLength(0))]/128);
+				if(width>4000)
+					finalHeightMap[y,x] += (float)(noiseMat[10][y/(length/noiseMat[10].GetLength(0)), x/(width/noiseMat[10].GetLength(0))]/256);
 
-					//make sure no really short buildings exist
-					if((finalHeightMap[y, x]>-0.1f && finalHeightMap[y, x]<0.1f))
-						finalHeightMap[y, x]=(float)Math.Abs(finalHeightMap[y, x])*3f+0.1f;
-					finalHeightMap[y, x] = (float)Math.Abs(finalHeightMap[y, x]);
-					//This makes sure all squares have buildings, will end up with areas with all small,
-					//same-sized buildings
-					/*if((finalHeightMap[y, x]>-0.1f && finalHeightMap[y, x]<0.1f))
-						finalHeightMap[y, x]=finalHeightMap[y, x]*3f+0.1f;*/
-					if(finalHeightMap[y, x] > max)
-						max = finalHeightMap[y, x];
-				}
+				finalHeightMap[y, x] = (float)Math.Abs(finalHeightMap[y, x]);
+
+				if(finalHeightMap[y, x] > max)
+					max = finalHeightMap[y, x];
 			}
 		}
 		for (int y = 0; y < length-1; y++) {
