@@ -63,8 +63,6 @@ public class ImplementationAttempt {
 		float addRows = 3;
 		float addCols = 3;
 		
-		float timesToRunVertical = ySize/origCols;
-		
 		//current row and column being used for the calculation
 		int row = 0, col = 0, newRow = 0, newCol = 0;
 		float currPoint=1;
@@ -91,7 +89,6 @@ public class ImplementationAttempt {
 				while(currPoint<addCols){
 					
 					distanceBetween = currPoint/addCols;
-					System.out.println(A + " " + B + " " + distanceBetween);
 
 					newMat[newRow][newCol] = interpolate(A, B, distanceBetween);
 					
@@ -118,26 +115,55 @@ public class ImplementationAttempt {
 		newRow = 0;
 		newCol = 0;
 		currPoint=0;
-		System.out.println();
 		
-		//Now does the rows in between
+		//possible floating point precision error
+		int totalSections = (int) (newMat[0].length/(addRows+1));
 		
-		//while the row counter is less than the final row of the original matrix
-		////move to next row
-		////while the columns hasn't gone over the end of original matrix
-		//////A is equal to the original number right above where the average is being done
-		//////B is right below where the average is being done
-		//////while the current pointer is less than the rows being added in:
-		////////the distance in-between is set to the distance between A and B on the new Matrix
-		////////the value on the new matrix is set
-		////////newCol increases, currPoint increases
-		//////currPoint is set to 0
-		//////the column of the original 
-		//////
+		newMat =  completedVertical(newMat, addRows, totalSections);
 		
-		//THE FREAKING ISSUE:
-		//I DONT NEED TO BE LOOKING AT THE ORIGINAL MATRIX ANYMORE
-		//WHAT IS WRONG WITH THIS PROGRAMMER
+		return newMat;
+	}
+	
+	private float[][] completedVertical(float[][] newMat, float rowsBetween, float totalSections){
+		
+		//fill in all rows in between each already completed row
+		
+		float row = 1;
+		float col = 0;
+		
+		float totalCols = newMat[0].length;
+		float totalRows = newMat.length;
+		
+		float ARow = 0f;
+		float BRow = rowsBetween; 
+		float A = 0f;
+		float B = 0f;
+		float fraction = 0f;
+		
+		//This implementation is so inefficient, going row by row, instead of column by column
+		
+		//loop through all rows
+		while(row<totalRows-1){
+			//loop through all columns
+			while(col < totalCols){
+				A = newMat[(int) ARow][(int) col];
+				B = newMat[(int) BRow][(int) col];
+				fraction = (row-ARow)/(BRow-ARow);
+				System.out.println(A + "  " + B + "  " + fraction);
+				newMat[(int) row][(int) col] = interpolate(A, B, fraction);
+				col++;
+			}
+			
+			col=0;
+			row++;
+			if(row%rowsBetween==0){
+				row++;
+				ARow+=rowsBetween;
+				BRow+=rowsBetween;
+			}
+			
+		}
+		
 		
 		return newMat;
 	}
