@@ -5,12 +5,10 @@ public class ImplementationAttempt {
 		float[][] startingArr = new float[2][2];
 		float[][] printer = new float[4][4];
 
-		System.out.println(startingArr[0][0] = 0.2f);
-		System.out.println(startingArr[0][1] = 0.8f);
-		System.out.println(startingArr[1][0] = 0.1f);
-		System.out.println(startingArr[1][1] = 0.6f);
-		System.out.println();
-		System.out.println();
+		startingArr[0][0] = 0.2f;
+		startingArr[0][1] = 0.8f;
+		startingArr[1][0] = 0.1f;
+		startingArr[1][1] = 0.6f;
 
 		//printer=cornersOfMatrix(startingArr, 4, 4);
 
@@ -29,7 +27,6 @@ public class ImplementationAttempt {
 			printDecimals(printer[3][3]);
 		}
 		else{
-			System.out.println();
 			printDecimals(printer[0][0]);
 			printDecimals(printer[0][1]);
 			printDecimals(printer[0][2]);
@@ -53,12 +50,8 @@ public class ImplementationAttempt {
 	}
 
 	private float[][] smarterInterpolation(float[][] oldMat, int newXY){
-		//0=0, 1=3, 2=6, 3=9, 4=12
-		//12/4=3
-		//0=0, 1=4, 2=8, 3=12, 4=16
 		float[][] newMat = new float[newXY][newXY];
 		int multiplier = (int) ((newXY-1)/(oldMat.length-1));
-		System.out.println(multiplier);
 		int x1;
 		int y1;
 		int x2;
@@ -80,12 +73,34 @@ public class ImplementationAttempt {
 					y1 = y/multiplier*multiplier;
 					y2 = y1+multiplier;
 					Q11 = oldMat[y/multiplier][x/multiplier];
-					System.out.println(x/multiplier);
 					Q12 = oldMat[y/multiplier][x/multiplier+1];
 					Q21 = oldMat[y/multiplier+1][x/multiplier];
 					Q22 = oldMat[y/multiplier+1][x/multiplier+1];
 					newMat[y][x] = calcInterpolatedValue(y, x, x1,  x2, y1, y2, Q11, Q21, Q12, Q22);
 				}
+			}
+		}
+		int y = newMat.length-1;
+		for(int x = 0; x < newMat[0].length-1; x++){
+			if(x%multiplier==0){
+				newMat[y][x] = oldMat[y/multiplier][x/multiplier];
+			}
+			else{
+				x1 = x/multiplier*multiplier;
+				x2 = x1+multiplier;
+				newMat[y][x] = interpolate(oldMat[y/multiplier][x1/multiplier], oldMat[y/multiplier][x2/multiplier], (float)(x-x1)/(x2-x1));
+			}
+		}
+		
+		int x = newMat.length-1;
+		for(y = 0; y < newMat.length; y++){
+			if(y%multiplier==0){
+				newMat[y][x] = oldMat[y/multiplier][x/multiplier];
+			}
+			else{
+				y1 = y/multiplier*multiplier;
+				y2 = y1+multiplier;
+				newMat[y][x] = interpolate(oldMat[y1/multiplier][x/multiplier], oldMat[y2/multiplier][x/multiplier], (float)(y-y1)/(y2-y1));
 			}
 		}
 
