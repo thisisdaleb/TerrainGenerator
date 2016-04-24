@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 
 [ExecuteInEditMode]
-public class InterpolationTiny : MonoBehaviour
+public class PerlinUsage : MonoBehaviour
 {
 	bool runNow;
 	bool extraRun = true;
@@ -68,7 +68,7 @@ public class InterpolationTiny : MonoBehaviour
 		//testCreation();
 
 		//create Simplex Noise matrix
-		createSimplexMatrix ();
+		//createSimplexMatrix ();
 		//add simplex noise to grass, water, and mountains
 		//makes sure areas near cities have a gentle enough slope to leave
 		//add complex Simplex Noise for mountains
@@ -143,63 +143,20 @@ public class InterpolationTiny : MonoBehaviour
 
 	private void createFloatMatrix ()
 	{
-		float firstNumber = 0f;
-		float secondNumber = 0f;
-		float distanceBetween = 0f;
 		float max = 0f;
 		float min = 1f;
 		finalHeightMap = new float[length, width];
-
-		//Loop through, defining points by interpolation
-		//if that spot is in the equivalent spot of the smaller matrix, add it in.
-		//if it is in between, interpolate.
-		//loops through and first goes by the even numbered rows, determining horizontal interpolation.
-		//loops through remaining rows to do vertical interpolation
-
-		//In this Tiny version, only the mat32 will be used.
-		for (int y = 0; y < length-1; y++) {
-			for (int x = 0; x < width-2; x++) {
-				if (y % 64 == 0) {
-					if (x % 64 == 0)
-						finalHeightMap [y, x] += (float)(noiseMat [3] [y / 64, x / 64]);
-					else if((x/64)<31){
-						//interpolate
-						firstNumber = noiseMat [3] [y / 64, x / 64];
-						secondNumber = noiseMat [3] [(y / 64), (x / 64) + 1];
-						distanceBetween = (x % 64) / 64f;
-						finalHeightMap [y, x] = Interpolate (firstNumber, secondNumber, distanceBetween);
-					}
-				}
-				finalHeightMap [y, x] = (float)Math.Abs (finalHeightMap [y, x]);
-
-				if (finalHeightMap [y, x] > max)
-					max = finalHeightMap [y, x];
-				if (finalHeightMap [y, x] < min)
-					min = finalHeightMap [y, x];
-			}
-		}
-
-
-		for (int y = 0; y < length-2; y++) {
-			for (int x = 0; x < width-1; x++) {
-				if (y % 64 != 0 && (y/64)<31) {
-					//interpolate
-					firstNumber = noiseMat [3] [y / 64, x / 64];
-					secondNumber = noiseMat [3] [(y / 64) + 1, (x / 64)];
-					distanceBetween = (y % 64) / 64f;
-					finalHeightMap [y, x] = Interpolate (firstNumber, secondNumber, distanceBetween);
-				}
-				finalHeightMap [y, x] = (float)Math.Abs (finalHeightMap [y, x]);
-
-				if (finalHeightMap [y, x] > max)
-					max = finalHeightMap [y, x];
-				if (finalHeightMap [y, x] < min)
-					min = finalHeightMap [y, x];
-			}
-		}
-
-		min = Math.Abs (min); 
 		
+		for (int y = 0; y < length; y++) {
+			for (int x = 0; x < width; x++) {
+				finalHeightMap [y, x] = Mathf.PerlinNoise(1/(y+1), 1/(x+1));
+				if (finalHeightMap [y, x] > max)
+					max = finalHeightMap [y, x];
+				if (finalHeightMap [y, x] < min)
+					min = finalHeightMap [y, x];
+			}
+		}
+
 		for (int y = 0; y < length-1; y++) {
 			for (int x = 0; x < width-1; x++) {
 				finalHeightMap [y, x] = (finalHeightMap [y, x] + min) / (max + min);
