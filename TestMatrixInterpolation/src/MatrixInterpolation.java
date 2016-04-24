@@ -45,7 +45,6 @@ public class MatrixInterpolation {
 		printDecimals(interpolate(0.1f, 0.6f, 2/3f));
 		printDecimals(0.6f);
 		System.out.println();
-		System.out.println();
 	}
 	
 	//could have the inputs be original size, minimum final size.

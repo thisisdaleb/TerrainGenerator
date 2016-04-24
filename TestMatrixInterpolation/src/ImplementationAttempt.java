@@ -3,50 +3,107 @@ public class ImplementationAttempt {
 
 	public void createAndPrintInefficientMatrix() {
 		float[][] startingArr = new float[2][2];
-		float[][] printer = new float[4][4];
+		
+		System.out.println();
+		System.out.println();
+		System.out.print((startingArr[0][0] = 0.2f) + "  ");
+		System.out.println((startingArr[0][1] = 0.8f) + "  ");
+		//System.out.println(startingArr[0][2] = 0.3f);
+		System.out.print((startingArr[1][0] = 0.1f) + "  ");
+		System.out.print((startingArr[1][1] = 0.6f) + "  ");
+		//System.out.println(startingArr[1][2] = 0.4f);
+		//System.out.print((startingArr[2][0] = 0.3f) + "  ");
+		//System.out.print((startingArr[2][1] = 0.5f) + "  ");
+		//System.out.println(startingArr[2][2] = 0.7f);
+		System.out.println();
 
-		startingArr[0][0] = 0.2f;
-		startingArr[0][1] = 0.8f;
-		startingArr[1][0] = 0.1f;
-		startingArr[1][1] = 0.6f;
-
+		int finalSize = 5;
+		System.out.print("Expand matrix to size (length and width): " + finalSize);
 		//printer=cornersOfMatrix(startingArr, 4, 4);
 
-		printer = smarterInterpolation(startingArr, 4);
+		float[][] printer = smartestInterpolation(startingArr, finalSize);
 
-		printIt(printer, true);
+		printOutMatrix(printer);
 	}
+	
+	private void printOutMatrix(float[][] arr){
+		for(int k=0;k<arr.length;k++){
+			System.out.println();
+			printDecimals(arr[k][0] );
+			for(int x = 1; x < arr[0].length; x++){
+				printDecimals(arr[k][x]);
+			}
+		}
+	}
+	
+	private float[][] smartestInterpolation(float[][] oldMat, int expand){
+		int newXY = expand*oldMat.length-expand+1;
+		float[][] newMat = new float[newXY][newXY];
+		int multiplier = (int) ((newXY-1)/(oldMat.length-1));
+		int x1;
+		int y1;
+		int x2;
+		int y2;
+		float Q1;
+		float Q2;
+		float Q3;
+		float Q4;
+		System.out.println();
 
-	private void printIt(float[][] printer, boolean doIt) {
-		if(!doIt){
-			System.out.println();
-			printDecimals(printer[0][0]);
-			printDecimals(printer[0][3]);
-			System.out.println();
-			printDecimals(printer[3][0]);
-			printDecimals(printer[3][3]);
+		for(int y=0; y< newMat.length-1; y++){
+
+			for(int x = 0; x < newMat[0].length-1; x++){
+				if(y%multiplier==0 && x%multiplier==0){
+					newMat[y][x] = oldMat[y/multiplier][x/multiplier];
+				}
+				else{
+					x1 = x/multiplier*multiplier;
+					x2 = x1+multiplier;
+					y1 = y/multiplier*multiplier;
+					y2 = y1+multiplier;
+					Q1 = oldMat[y/multiplier][x/multiplier];
+					Q2 = oldMat[y/multiplier][x/multiplier+1];
+					Q3 = oldMat[y/multiplier+1][x/multiplier];
+					Q4 = oldMat[y/multiplier+1][x/multiplier+1];
+					
+					newMat[y][x] = fixedCalc((float)(x-x1)/(x2-x1), (float)(y-y1)/(y2-y1), Q1, Q2, Q3, Q4);
+				}
+			}
 		}
-		else{
-			printDecimals(printer[0][0]);
-			printDecimals(printer[0][1]);
-			printDecimals(printer[0][2]);
-			printDecimals(printer[0][3]);
-			System.out.println();
-			printDecimals(printer[1][0]);
-			printDecimals(printer[1][1]);
-			printDecimals(printer[1][2]);
-			printDecimals(printer[1][3]);
-			System.out.println();
-			printDecimals(printer[2][0]);
-			printDecimals(printer[2][1]);
-			printDecimals(printer[2][2]);
-			printDecimals(printer[2][3]);
-			System.out.println();
-			printDecimals(printer[3][0]);
-			printDecimals(printer[3][1]);
-			printDecimals(printer[3][2]);
-			printDecimals(printer[3][3]);
+		int y = newMat.length-1;
+		for(int x = 0; x < newMat[0].length-1; x++){
+			if(x%multiplier==0){
+				newMat[y][x] = oldMat[y/multiplier][x/multiplier];
+			}
+			else{
+				x1 = x/multiplier*multiplier;
+				x2 = x1+multiplier;
+				newMat[y][x] = interpolate(oldMat[y/multiplier][x1/multiplier], oldMat[y/multiplier][x2/multiplier], (float)(x-x1)/(x2-x1));
+			}
 		}
+		
+		int x = newMat.length-1;
+		for(y = 0; y < newMat.length; y++){
+			if(y%multiplier==0){
+				newMat[y][x] = oldMat[y/multiplier][x/multiplier];
+			}
+			else{
+				y1 = y/multiplier*multiplier;
+				y2 = y1+multiplier;
+				newMat[y][x] = interpolate(oldMat[y1/multiplier][x/multiplier], oldMat[y2/multiplier][x/multiplier], (float)(y-y1)/(y2-y1));
+			}
+		}
+
+		return newMat;
+	}
+	
+	private float fixedCalc(float fractionX, float fractionY, float Q1, float Q2, float Q3, float Q4){
+				return (1 - fractionX) * 
+				                        ((1 - fractionY) * Q1 + 
+				                         fractionY * Q3) + 
+				                    fractionX * 
+				                        ((1 - fractionY) * Q2 + 
+				                        fractionY * Q4);
 	}
 
 	private float[][] smarterInterpolation(float[][] oldMat, int newXY){
@@ -60,6 +117,7 @@ public class ImplementationAttempt {
 		float Q12;
 		float Q21;
 		float Q22;
+		System.out.println();
 
 		for(int y=0; y< newMat.length-1; y++){
 
@@ -76,6 +134,9 @@ public class ImplementationAttempt {
 					Q12 = oldMat[y/multiplier][x/multiplier+1];
 					Q21 = oldMat[y/multiplier+1][x/multiplier];
 					Q22 = oldMat[y/multiplier+1][x/multiplier+1];
+					if(x>3 && y<2){
+						System.out.println(" " + y + " " + x + " " + x1 + " " + x2 + " " + y1 + " " + y2 + " " + Q11 + " " + Q21 + " " + Q12 + " " + Q22 + " ");
+					}
 					newMat[y][x] = calcInterpolatedValue(y, x, x1,  x2, y1, y2, Q11, Q21, Q12, Q22);
 				}
 			}
@@ -127,6 +188,9 @@ public class ImplementationAttempt {
 		float  ans2 = (((x-x1)*(y2-y))/((x2-x1)*(y2-y1)))*Q21;
 		float ans3 = (((x2-x)*(y-y1))/((x2-x1)*(y2-y1)))*Q12;
 		float ans4 = (((x-x1)*(y-y1))/((x2-x1)*(y2-y1)))*Q22;
+		if(x>3 && y<2){
+			System.out.println(ans1 + " " + ans2 + " " + ans3 + " " + ans4 + " ");
+		}
 		return (ans1+ans2+ans3+ans4);
 	};
 
