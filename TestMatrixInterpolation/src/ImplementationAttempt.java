@@ -2,22 +2,28 @@
 public class ImplementationAttempt {
 
 	public void createAndPrintInefficientMatrix() {
-		float[][] startingArr = new float[2][2];
+		float[][] startingArr = new float[4][4];
 		
 		System.out.println();
 		System.out.println();
 		System.out.print((startingArr[0][0] = 0.2f) + "  ");
-		System.out.println((startingArr[0][1] = 0.8f) + "  ");
-		//System.out.println(startingArr[0][2] = 0.3f);
+		System.out.print((startingArr[0][1] = 0.8f) + "  ");
+		System.out.println(startingArr[0][2] = 0.3f);
+		startingArr[0][3] = 0.6f;
 		System.out.print((startingArr[1][0] = 0.1f) + "  ");
-		System.out.print((startingArr[1][1] = 0.6f) + "  ");
-		//System.out.println(startingArr[1][2] = 0.4f);
-		//System.out.print((startingArr[2][0] = 0.3f) + "  ");
-		//System.out.print((startingArr[2][1] = 0.5f) + "  ");
-		//System.out.println(startingArr[2][2] = 0.7f);
-		System.out.println();
+		System.out.print((startingArr[1][1] = 1f) + "  ");
+		System.out.println(startingArr[1][2] = 0.4f);
+		startingArr[1][3] = 0.2f;
+		System.out.print((startingArr[2][0] = 0.3f) + "  ");
+		System.out.print((startingArr[2][1] = 0.5f) + "  ");
+		System.out.print(startingArr[2][2] = 0.0f);
+		System.out.println(startingArr[2][3] = 0.1f);
+		System.out.print(startingArr[3][0] = 0.9f);
+		System.out.print(startingArr[3][1] = 0.2f);
+		System.out.print(startingArr[3][2] = 0.3f);
+		System.out.println(startingArr[3][3] = 0.7f);
 
-		int finalSize = 5;
+		int finalSize = 3;
 		System.out.print("Expand matrix to size (length and width): " + finalSize);
 		//printer=cornersOfMatrix(startingArr, 4, 4);
 
@@ -97,13 +103,14 @@ public class ImplementationAttempt {
 		return newMat;
 	}
 	
+	
+	//Q1 = top left Number
+	//Q2 = top right number
+	//Q3 = bottom left number
+	//Q4 = bottom right number
+	//fractionX and fractionY are the fraction/percentage of how far from top left to bottom right they are for each coordinate 
 	private float fixedCalc(float fractionX, float fractionY, float Q1, float Q2, float Q3, float Q4){
-				return (1 - fractionX) * 
-				                        ((1 - fractionY) * Q1 + 
-				                         fractionY * Q3) + 
-				                    fractionX * 
-				                        ((1 - fractionY) * Q2 + 
-				                        fractionY * Q4);
+				return (1 - fractionX) * ((1 - fractionY) * Q1 + fractionY * Q3) + fractionX * ((1 - fractionY) * Q2 + fractionY * Q4);
 	}
 
 	private float[][] smarterInterpolation(float[][] oldMat, int newXY){
