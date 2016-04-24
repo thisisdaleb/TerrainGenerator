@@ -23,13 +23,13 @@ public class ImplementationAttempt {
 		System.out.print(startingArr[3][2] = 0.3f);
 		System.out.println(startingArr[3][3] = 0.7f);
 
-		int finalSize = 3;
-		System.out.print("Expand matrix to size (length and width): " + finalSize);
-		//printer=cornersOfMatrix(startingArr, 4, 4);
+		int finalSize = 5;
+		System.out.print("Expand matrix to size (length and width per number): " + finalSize);
 
 		float[][] printer = smartestInterpolation(startingArr, finalSize);
 
 		printOutMatrix(printer);
+		System.out.print("Expanded matrix to size (length and width): " + printer.length);
 	}
 	
 	private void printOutMatrix(float[][] arr){
@@ -40,6 +40,7 @@ public class ImplementationAttempt {
 				printDecimals(arr[k][x]);
 			}
 		}
+		System.out.println();
 	}
 	
 	private float[][] smartestInterpolation(float[][] oldMat, int expand){
