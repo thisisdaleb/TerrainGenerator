@@ -4,12 +4,12 @@ using System;
 using System.Collections.Generic;
 
 [ExecuteInEditMode]
-public class InterpolatedFour : MonoBehaviour
+public class InterpolatedEight : MonoBehaviour
 {
 	bool runNow;
 	bool extraRun = true;
 	private int[,] initColorMap;
-	private int width = 2049; //These 2 defined by input! Each terrain 4097 pixels wide and long
+	private int width = 4097; //These 2 defined by input! Each terrain 4097 pixels wide and long
 	private int length; //Input is amount of tiles in width and length (Ex: 2x3 tiles)
 	private float[,] finalHeightMap; //defines the elevation of each height point between 0.0 and 1.0
 	private int terrainWidth = 30000; //defines the width of the terrain in meters
@@ -157,14 +157,14 @@ public class InterpolatedFour : MonoBehaviour
 	{
 		finalHeightMap = new float[length, width];
 		
-		samples0 = smartestInterpolation (noiseMat[0], 820);
-		samples1 = smartestInterpolation (noiseMat[1], 310);
-		samples2 = smartestInterpolation (noiseMat[2], 142);
-		samples3 = smartestInterpolation (noiseMat[3], 67);
-		samples4 = smartestInterpolation (noiseMat[4], 34);
-		samples5 = smartestInterpolation (noiseMat[5], 17);
-		samples6 = smartestInterpolation (noiseMat[6], 9);
-		samples7 = smartestInterpolation (noiseMat[7], 5);
+		samples0 = smartestInterpolation (noiseMat[0], 820*2);
+		samples1 = smartestInterpolation (noiseMat[1], 310*2);
+		samples2 = smartestInterpolation (noiseMat[2], 142*2);
+		samples3 = smartestInterpolation (noiseMat[3], 67*2);
+		samples4 = smartestInterpolation (noiseMat[4], 34*2);
+		samples5 = smartestInterpolation (noiseMat[5], 17*2);
+		samples6 = smartestInterpolation (noiseMat[6], 9*2);
+		samples7 = smartestInterpolation (noiseMat[7], 5*2);
 		print (samples0.GetLength(0));
 		print (samples1.GetLength(0));
 		print (samples2.GetLength(0));
