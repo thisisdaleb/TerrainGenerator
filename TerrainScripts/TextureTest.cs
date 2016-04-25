@@ -12,9 +12,9 @@ public class TextureTest : MonoBehaviour
 	private int width = 2049; //These 2 defined by input! Each terrain 4097 pixels wide and long
 	private int length; //Input is amount of tiles in width and length (Ex: 2x3 tiles)
 	private float[,] finalHeightMap; //defines the elevation of each height point between 0.0 and 1.0
-	private int terrainWidth = 30000; //defines the width of the terrain in meters
+	private int terrainWidth = 3000; //defines the width of the terrain in meters
 	private int terrainHeight = 100; //defines the maximum possible height of the terrain
-	private int terrainLength = 30000; //defines the length of the terrain in meters
+	private int terrainLength = 3000; //defines the length of the terrain in meters
 	private Texture2D tex;
 	
 	//important note:
@@ -88,12 +88,13 @@ public class TextureTest : MonoBehaviour
 
 		
 		for (int y = 0; y < length-1; y++) {
+			print (tex.GetPixel(0, y).g);
 			for (int x = 0; x < width-1; x++) {
-				if(tex.GetPixel(x, y).g > 150){ //field
+				if(tex.GetPixel(x, y).g > 0.6){ //field
 					finalHeightMap[y, x] = 0.5f;
-				}else if(tex.GetPixel(x, y).r > 150){ //mountains
+				}else if(tex.GetPixel(x, y).r > 0.6){ //mountains
 					finalHeightMap[y, x] = 0.9f;
-				}else if(tex.GetPixel(x, y).b > 150){ //water 
+				}else if(tex.GetPixel(x, y).b > 0.6){ //water 
 					finalHeightMap[y, x] = 0.4f;
 				}
 				else{ //city

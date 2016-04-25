@@ -28,7 +28,7 @@ public class TerrainGeneratorInputTexture : MonoBehaviour
 	private float[, ] samples7;
 	private float[, ] samples8;
 	private float[, ] samples9;
-	private Texture2D tex = Resources.Load("InputPicture") as Texture2D;
+	//private Texture2D tex = Resources.Load("InputPictureA") as Texture2D;
 	
 	//important note:
 	//boundary of map defined by:
