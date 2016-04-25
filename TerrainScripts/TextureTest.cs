@@ -8,13 +8,13 @@ public class TextureTest : MonoBehaviour
 {
 	bool runNow;
 	bool extraRun = true;
-	private int[,] initColorMap;
+	private int[,] colorMap;
 	private int width = 2049; //These 2 defined by input! Each terrain 4097 pixels wide and long
 	private int length; //Input is amount of tiles in width and length (Ex: 2x3 tiles)
 	private float[,] finalHeightMap; //defines the elevation of each height point between 0.0 and 1.0
-	private int terrainWidth = 3000; //defines the width of the terrain in meters
-	private int terrainHeight = 100; //defines the maximum possible height of the terrain
-	private int terrainLength = 3000; //defines the length of the terrain in meters
+	private int terrainWidth = 14000; //defines the width of the terrain in meters
+	private int terrainHeight = 500; //defines the maximum possible height of the terrain
+	private int terrainLength = 10000; //defines the length of the terrain in meters
 	private Texture2D tex;
 	
 	//important note:
@@ -35,21 +35,9 @@ public class TextureTest : MonoBehaviour
 		length = width;
 		runNow = true;
 
-		tex = Resources.Load("InputPictureA") as Texture2D;
+		colorMap = new int[width, length];
 
-		if (tex != null) {
-			print ("NULL");
-		}
-		else {
-			print ("Worked");
-		}
-		if (tex.Equals(null)) {
-			print ("NULL");
-		}
-		else {
-			print ("Worked");
-		}
-
+		tex = Resources.Load("InputPictureE") as Texture2D;
 	}
 	
 	// Update is called once per frame
@@ -78,7 +66,60 @@ public class TextureTest : MonoBehaviour
 	
 	void setColors ()
 	{
-		
+		//GetPixel is not efficient. This method could run 100X faster if I replace that with GetPixels or GetPixels32 or whatever I need.
+
+		int imageLoopX = tex.width;
+		int imageLoopY = tex.height;
+
+		int loopX = 0;
+		int loopY = 0;
+
+		int xPlaced = width / imageLoopX;
+		int yPlaced = length / imageLoopY;
+
+		int placeX = 0;
+		int placeY = 0;
+
+		print ("Values:  " + imageLoopX +  "  " + imageLoopY + "  " + loopX +  "  " + loopY + "  ");
+		print ("Values:  " + xPlaced +  "  " + yPlaced + "  " + placeX +  "  " + placeY + "  ");
+
+		while (loopY < imageLoopY) {
+			while (loopX < imageLoopX) {
+				while(placeY < yPlaced){
+					while(placeX < xPlaced){
+						if((yPlaced*loopY)+placeY < length && (xPlaced*loopX)+placeX < width){
+
+							if(tex.GetPixel(loopX, loopY).g > 0.8)
+							{ //field
+								colorMap[(yPlaced*loopY)+placeY, (xPlaced*loopX)+placeX] = (int) ground.Field;
+
+							}
+							else if(tex.GetPixel(loopX, loopY).r > 0.8)
+							{ //mountains
+								colorMap[(yPlaced*loopY)+placeY, (xPlaced*loopX)+placeX] = (int) ground.Mountain;
+
+							}
+							else if(tex.GetPixel(loopX, loopY).b > 0.8)
+							{ //water 
+								colorMap[(yPlaced*loopY)+placeY, (xPlaced*loopX)+placeX] = (int) ground.Water;
+
+							}
+							else
+							{ //city
+								colorMap[(yPlaced*loopY)+placeY, (xPlaced*loopX)+placeX] = (int) ground.City;
+							}
+						}
+						placeX++;
+					}
+					placeX=0;
+					placeY++;
+				}
+				placeY=0;
+				loopX++;
+			}
+			loopX=0;
+			loopY++;
+		}
 	}
 
 	private void createFloatMatrix ()
@@ -88,17 +129,21 @@ public class TextureTest : MonoBehaviour
 
 		
 		for (int y = 0; y < length-1; y++) {
-			print (tex.GetPixel(0, y).g);
+
 			for (int x = 0; x < width-1; x++) {
-				if(tex.GetPixel(x, y).g > 0.6){ //field
-					finalHeightMap[y, x] = 0.5f;
-				}else if(tex.GetPixel(x, y).r > 0.6){ //mountains
+
+				if(colorMap[y, x] == (int) ground.Field){ //field
+					finalHeightMap[y, x] = 0.52f;
+
+				}else if(colorMap[y, x] == (int) ground.Mountain){ //mountains
 					finalHeightMap[y, x] = 0.9f;
-				}else if(tex.GetPixel(x, y).b > 0.6){ //water 
-					finalHeightMap[y, x] = 0.4f;
+
+				}else if(colorMap[y, x] == (int) ground.Water){ //water 
+					finalHeightMap[y, x] = 0.1f;
+
 				}
 				else{ //city
-					finalHeightMap[y, x] = 0.1f;
+					finalHeightMap[y, x] = 0.5f;
 				}
 			}
 		}
