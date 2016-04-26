@@ -37,7 +37,7 @@ public class TextureTest : MonoBehaviour
 
 		colorMap = new int[width, length];
 
-		tex = Resources.Load("InputPictureE") as Texture2D;
+		tex = Resources.Load("InputPictureG") as Texture2D;
 	}
 	
 	// Update is called once per frame
@@ -89,17 +89,17 @@ public class TextureTest : MonoBehaviour
 					while(placeX < xPlaced){
 						if((yPlaced*loopY)+placeY < length && (xPlaced*loopX)+placeX < width){
 
-							if(tex.GetPixel(loopX, loopY).g > 0.8)
+							if(tex.GetPixel(loopX, loopY).g > 0.5)
 							{ //field
 								colorMap[(yPlaced*loopY)+placeY, (xPlaced*loopX)+placeX] = (int) ground.Field;
 
 							}
-							else if(tex.GetPixel(loopX, loopY).r > 0.8)
+							else if(tex.GetPixel(loopX, loopY).r > 0.7)
 							{ //mountains
 								colorMap[(yPlaced*loopY)+placeY, (xPlaced*loopX)+placeX] = (int) ground.Mountain;
 
 							}
-							else if(tex.GetPixel(loopX, loopY).b > 0.8)
+							else if(tex.GetPixel(loopX, loopY).b > 0.7)
 							{ //water 
 								colorMap[(yPlaced*loopY)+placeY, (xPlaced*loopX)+placeX] = (int) ground.Water;
 

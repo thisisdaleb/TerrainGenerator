@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 
 [ExecuteInEditMode]
-public class TerrainGeneratorSetPersistence : MonoBehaviour
+public class GeneratorWithTextureTest : MonoBehaviour
 {
 	bool runNow;
 	bool extraRun = true;
@@ -12,9 +12,9 @@ public class TerrainGeneratorSetPersistence : MonoBehaviour
 	private int width = 2049; //These 2 defined by input! Each terrain 4097 pixels wide and long
 	private int length; //Input is amount of tiles in width and length (Ex: 2x3 tiles)
 	private float[,] finalHeightMap; //defines the elevation of each height point between 0.0 and 1.0
-	private int terrainWidth = 30000; //defines the width of the terrain in meters
-	private int terrainHeight = 4000; //defines the maximum possible height of the terrain
-	private int terrainLength = 30000; //defines the length of the terrain in meters
+	private int terrainWidth = 14000; //defines the width of the terrain in meters
+	private int terrainHeight = 2000; //defines the maximum possible height of the terrain
+	private int terrainLength = 10000; //defines the length of the terrain in meters
 	private SimplexNoiseGenerator simplex;
 	private List<float[,]> noiseMat;
 	private int[] matSizes;
@@ -28,6 +28,8 @@ public class TerrainGeneratorSetPersistence : MonoBehaviour
 	private float[, ] samples7;
 	private float[, ] samples8;
 	private float[, ] samples9;
+	private int[,] colorMap;
+	private Texture2D tex;
 	
 	//important note:
 	//boundary of map defined by:
@@ -46,11 +48,16 @@ public class TerrainGeneratorSetPersistence : MonoBehaviour
 	{
 		length = width;
 		runNow = true;
+
+		colorMap = new int[width, length];
+		
+		tex = Resources.Load("InputPictureG") as Texture2D;
+
 		matSizes = new int[10];
 		for (int mats = 0; mats < (matSizes.GetLength(0)); mats++) {
 			matSizes [mats] = 4 * ((int)Math.Pow (2, mats));
 		}
-
+		
 		samples0 = new float[width, width];
 		samples1 = new float[width, width];
 		samples2 = new float[width, width];
@@ -73,15 +80,9 @@ public class TerrainGeneratorSetPersistence : MonoBehaviour
 	
 	void convertInputIntoMap ()
 	{
-		//yield return null;
 		print ("Start running processor melting program.");
 		
-		////import picture,
-		//createMatrix of colors
-		
-		//setColors();
-		
-		//testCreation();
+		setColors();
 		
 		//create Simplex Noise matrix
 		createSimplexMatrix ();
@@ -92,8 +93,6 @@ public class TerrainGeneratorSetPersistence : MonoBehaviour
 		//create matrix of floats, set to the integer matrix where the minimum
 		//integer value is normalized to 0.0f and the maximum value is at 1.0f
 		createFloatMatrix ();
-		//++++TestSetFloatMatrix
-		//testFloatMatrix();
 		
 		//Create terrain and send it through the world
 		createTerrain ();
@@ -104,34 +103,61 @@ public class TerrainGeneratorSetPersistence : MonoBehaviour
 	
 	void setColors ()
 	{
+		//GetPixel is not efficient. This method could run 100X faster if I replace that with GetPixels or GetPixels32 or whatever I need.
 		
-	}
-	
-	//##
-	//START OF TEST METHODS
-	//##
-	private void testCreation ()
-	{
-		//Not how it will work, this is just a test method, remember!
-		initColorMap = new int[length, width];
-		for (int k = 0; k<length; k++) {
-			for (int z = 0; z < width; z++) {
-				if (k < length / 5 * 2) {
-					initColorMap [k, z] = (int)ground.Mountain;
-				} else if (k < length / 5 * 3) {
-					initColorMap [k, z] = (int)ground.Field;
-				} else if (k < length / 5 * 4) {
-					initColorMap [k, z] = (int)ground.City;
-				} else {
-					initColorMap [k, z] = (int)ground.Water;
+		int imageLoopX = tex.width;
+		int imageLoopY = tex.height;
+		
+		int loopX = 0;
+		int loopY = 0;
+		
+		int xPlaced = width / imageLoopX;
+		int yPlaced = length / imageLoopY;
+		
+		int placeX = 0;
+		int placeY = 0;
+		
+		print ("Values:  " + imageLoopX +  "  " + imageLoopY + "  " + loopX +  "  " + loopY + "  ");
+		print ("Values:  " + xPlaced +  "  " + yPlaced + "  " + placeX +  "  " + placeY + "  ");
+		
+		while (loopY < imageLoopY) {
+			while (loopX < imageLoopX) {
+				while(placeY < yPlaced){
+					while(placeX < xPlaced){
+						if((yPlaced*loopY)+placeY < length && (xPlaced*loopX)+placeX < width){
+							
+							if(tex.GetPixel(loopX, loopY).g > 0.5)
+							{ //field
+								colorMap[(yPlaced*loopY)+placeY, (xPlaced*loopX)+placeX] = (int) ground.Field;
+								
+							}
+							else if(tex.GetPixel(loopX, loopY).r > 0.7)
+							{ //mountains
+								colorMap[(yPlaced*loopY)+placeY, (xPlaced*loopX)+placeX] = (int) ground.Mountain;
+								
+							}
+							else if(tex.GetPixel(loopX, loopY).b > 0.7)
+							{ //water 
+								colorMap[(yPlaced*loopY)+placeY, (xPlaced*loopX)+placeX] = (int) ground.Water;
+								
+							}
+							else
+							{ //city
+								colorMap[(yPlaced*loopY)+placeY, (xPlaced*loopX)+placeX] = (int) ground.City;
+							}
+						}
+						placeX++;
+					}
+					placeX=0;
+					placeY++;
 				}
+				placeY=0;
+				loopX++;
 			}
+			loopX=0;
+			loopY++;
 		}
 	}
-	
-	//##
-	//END OF TEST METHODS
-	//##
 	
 	
 	/// <summary>
@@ -160,12 +186,12 @@ public class TerrainGeneratorSetPersistence : MonoBehaviour
 	private void createFloatMatrix ()
 	{
 		float[] persistence = new float[10]; 
-
+		
 		//Fraction of how much each level of noise is worth compared to the next level
-		float perst = 0.4f; 
-
-
+		float perst = 0.5f;
+		
 		finalHeightMap = new float[length, width];
+
 		if (width > 4000) {
 			samples0 = smartestInterpolation (noiseMat [0], 820 * 2);
 			samples1 = smartestInterpolation (noiseMat [1], 310 * 2);
@@ -197,14 +223,14 @@ public class TerrainGeneratorSetPersistence : MonoBehaviour
 			samples6 = smartestInterpolation (noiseMat [6], 5);
 			samples7 = smartestInterpolation (noiseMat [7], 3);
 		}
-
+		
 		for (int z = 0; z < 8; z++) {
 			persistence[z] = (float)(Math.Pow (perst, z));
 		}
-		
+
 		for (int y = 0; y < length-1; y++) {
 			for (int x = 0; x < width-1; x++) {
-				finalHeightMap[y, x] += samples0[y, x];
+				//finalHeightMap[y, x] += samples0[y, x];
 				finalHeightMap[y, x] += samples1[y, x]*persistence[1];
 				finalHeightMap[y, x] += samples2[y, x]*persistence[2];
 				finalHeightMap[y, x] += samples3[y, x]*persistence[3];
@@ -217,7 +243,7 @@ public class TerrainGeneratorSetPersistence : MonoBehaviour
 					finalHeightMap[y, x] += samples9[y, x]*persistence[9];
 			}
 		}
-		
+
 		//
 		//Set Min and Max, make map be all 1
 		//
@@ -246,6 +272,28 @@ public class TerrainGeneratorSetPersistence : MonoBehaviour
 		//
 		//Set Min and Max, make map be all 1
 		//
+
+		
+		for (int y = 0; y < length-1; y++) {
+			
+			for (int x = 0; x < width-1; x++) {
+				
+				if(colorMap[y, x] == (int) ground.Field){ //field
+					finalHeightMap[y, x] = 0.5f + Math.Abs(finalHeightMap[y, x]/8f);
+					
+				}else if(colorMap[y, x] == (int) ground.Mountain){ //mountains
+					finalHeightMap[y, x] = 0.52f + Math.Abs(finalHeightMap[y, x]/2);
+					
+				}else if(colorMap[y, x] == (int) ground.Water){ //water 
+					finalHeightMap[y, x] = 0.49f - Math.Abs(finalHeightMap[y, x]/16);
+				}
+				else{ //city
+					finalHeightMap[y, x] = 0.5f + Math.Abs(finalHeightMap[y, x]/8f);
+				}
+			}
+		}
+		
+
 	}
 	
 	private float[, ] smartestInterpolation(float[, ] oldMat, int expand){
