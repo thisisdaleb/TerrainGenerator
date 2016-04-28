@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 
 [ExecuteInEditMode]
-public class GenerateTextureNumberTest : MonoBehaviour
+public class GenGuidedTerrainTextureTest : MonoBehaviour
 {
 	bool runNow;
 	bool extraRun = true;
@@ -18,7 +18,9 @@ public class GenerateTextureNumberTest : MonoBehaviour
 	private int[,] colorMap;
 	private Texture2D tex;
 	private float[, ] pixelDistances;
-	
+	SplatPrototype[] terrainTexs;
+	private Texture2D[] textureList;
+
 	//important note:
 	//boundary of map defined by:
 	//!((k+y) < 0 || (k + y) > (length-1) || (z + x) < 0 || (z + x) > (width-1))
@@ -36,12 +38,20 @@ public class GenerateTextureNumberTest : MonoBehaviour
 	{
 		length = width;
 		runNow = true;
-
+		
 		colorMap = new int[width, length];
 		
 		pixelDistances = new float[width, length];
-
+		
 		tex = Resources.Load("InputPictureG") as Texture2D;
+
+		textureList = new Texture2D[2];
+
+		textureList[0] =  Resources.Load("GrassB") as Texture2D;
+
+		textureList[1] =  Resources.Load("MountainTexture") as Texture2D;
+
+		terrainTexs = new SplatPrototype [2];
 	}
 	
 	// Update is called once per frame
@@ -57,13 +67,13 @@ public class GenerateTextureNumberTest : MonoBehaviour
 		print ("Start running processor melting program.");
 		
 		setColors ();
-
+		
 		setDistances ();
-
+		
 		//create matrix of floats, set to the integer matrix where the minimum
 		//integer value is normalized to 0.0f and the maximum value is at 1.0f
 		createFloatMatrix ();
-		
+
 		//Create terrain and send it through the world
 		createTerrain ();
 		
@@ -128,24 +138,33 @@ public class GenerateTextureNumberTest : MonoBehaviour
 			loopY++;
 		}
 	}
-
+	
 	private void setDistances ()
 	{
 		for(int y = 0; y < pixelDistances.GetLength(0); y++)
 		{
 			for(int x = 0; x < pixelDistances.GetLength(1); x++)
 			{
-				if(colorMap[y, x]== (int) ground.Mountain){
-					if(y==0 || x==0){
-						pixelDistances[y, x] = 1;
-					}
-					else if(colorMap[y, x-1] == (int) ground.Mountain){
-						pixelDistances[y, x] = pixelDistances[y, x-1]+1;
-					}
-					else{
-						pixelDistances[y, x] = 1;
-					}
-				}
+				pixelTypeDistance(y, x, 0, -1, (int) ground.Mountain, true);
+				pixelTypeDistance(y, x, 0, -1, (int) ground.Water, true);
+			}
+		}
+		
+		for(int y = pixelDistances.GetLength(0)-1; y >= 0; y--)
+		{
+			for(int x = pixelDistances.GetLength(1)-1; x >= 0; x--)
+			{
+				pixelTypeDistance(y, x, 0, 1, (int) ground.Mountain, false);
+				pixelTypeDistance(y, x, 0, 1, (int) ground.Water, false);
+			}
+		}
+
+		for(int y = 0; y < pixelDistances.GetLength(0); y++)
+		{
+			for(int x = 0; x < pixelDistances.GetLength(1); x++)
+			{
+				pixelTypeDistance(y, x, -1, 0, (int) ground.Mountain, false);
+				pixelTypeDistance(y, x, -1, 0, (int) ground.Water, false);
 			}
 		}
 
@@ -153,32 +172,37 @@ public class GenerateTextureNumberTest : MonoBehaviour
 		{
 			for(int x = pixelDistances.GetLength(1)-1; x >= 0; x--)
 			{
-				if(colorMap[y, x]== (int) ground.Mountain){
-					if(y == pixelDistances.GetLength(0)-1 || x == pixelDistances.GetLength(1)-1){
-						pixelDistances[y, x] = 1;
-					}
-					else if(colorMap[y, x+1] == (int) ground.Mountain){
-						if(pixelDistances[y, x] >= pixelDistances[y, x+1])
-							pixelDistances[y, x] = pixelDistances[y, x+1]+1;
-					}
-					else{
-						pixelDistances[y, x] = 1;
-					}
-				}
+				pixelTypeDistance(y, x, 1, 0, (int) ground.Mountain, false);
+				pixelTypeDistance(y, x, 1, 0, (int) ground.Water, false);
 			}
 		}
 	}
 	
-	/// <summary>
-	/// ######################
-	/// ######################
-	/// BEGIN SECTION DEVOTED TO NOISE
-	/// ######################
-	/// ######################
-	/// </summary>
+	private void pixelTypeDistance(int y, int x, int movingY, int movingX, int groundType, Boolean secondRun){
+		if(colorMap[y, x]== groundType){
+			if(y==0 || x==0 || y == pixelDistances.GetLength(0)-1 || x == pixelDistances.GetLength(1)-1){
+				pixelDistances[y, x] = 1;
+			}
+			else if(colorMap[y+movingY, x+movingX] == (int) groundType){
+				if(secondRun || pixelDistances[y, x] >= pixelDistances[y+movingY, x+movingX])
+					pixelDistances[y, x] = pixelDistances[y+movingY, x+movingX]+1;
+			}
+			else{
+				pixelDistances[y, x] = 1;
+			}
+		}
+	}
+	
+	
+	
+	private void fieldDistance(){
+		
+	}
 	
 	private void createFloatMatrix ()
 	{
+		
+		print ("Mountain Height check  " + pixelDistances[5, 5]);
 		
 		finalHeightMap = new float[length, width];
 		
@@ -187,22 +211,22 @@ public class GenerateTextureNumberTest : MonoBehaviour
 			for (int x = 0; x < width-1; x++) {
 				
 				if(colorMap[y, x] == (int) ground.Field){ //field
-					finalHeightMap[y, x] = 0.1f;
+					finalHeightMap[y, x] = 0.0f;
 					
 				}else if(colorMap[y, x] == (int) ground.Mountain){ //mountains
-					finalHeightMap[y, x] = 0.1f + pixelDistances[y, x]*0.02f;
+					finalHeightMap[y, x] = 0.0f + (float)(pixelDistances[y, x])*0.02f;
 					
 				}else if(colorMap[y, x] == (int) ground.Water){ //water 
-					finalHeightMap[y, x] = 0.0f;
+					finalHeightMap[y, x] = 0.0f - (float)(pixelDistances[y, x])*0.01f;
 				}
 				else{ //city
-					finalHeightMap[y, x] = 0.1f;
+					finalHeightMap[y, x] = 0.0f;
 				}
 			}
 		}
 		setMin ();
 	}
-
+	
 	private void setMin (){
 		float min = 1f;
 		float max = 0f;
@@ -220,14 +244,29 @@ public class GenerateTextureNumberTest : MonoBehaviour
 		}
 		
 		min = Math.Abs (min); 
-
-		terrainHeight = (int)(max*500f);
-
+		
+		terrainHeight = (int)((max+Math.Abs(min))*500f);
+		
 		for (int y = 0; y < length-1; y++) {
 			for (int x = 0; x < width-1; x++) {
 				finalHeightMap [y, x] = (finalHeightMap [y, x] + min) / (max + min);
 			}
 		}
+	}
+
+	private void createTextures ()
+	{
+		terrainTexs [0] = new SplatPrototype ();
+		terrainTexs [0].texture = textureList [0];
+		terrainTexs [0].tileSize = new Vector2 (5, 5);
+		terrainTexs [1] = new SplatPrototype ();
+		terrainTexs [1].texture = textureList [1];
+		terrainTexs [1].tileSize = new Vector2 (5, 5);
+	}
+	
+	private void placeTextures ()
+	{
+
 	}
 	
 	private void createTerrain ()
@@ -240,25 +279,17 @@ public class GenerateTextureNumberTest : MonoBehaviour
 		
 		terrainData.SetHeights (0, 0, finalHeightMap);
 		terrainData.size = new Vector3 (terrainWidth, terrainHeight, terrainLength);
-		//terrainData.splatPrototypes = m_splatPrototypes;
+
+		createTextures ();
+
+		terrainData.splatPrototypes = terrainTexs;
+		
+		
+		placeTextures ();
 		//terrainData.treePrototypes = m_treeProtoTypes;
 		//terrainData.detailPrototypes = m_detailProtoTypes;
 		GameObject go = Terrain.CreateTerrainGameObject (terrainData);
 		go.transform.position.Set (0, 0, 0);
 		print ("It made it to the end");
-	}
-	
-	//inputs A and B are the numbers that are being interpolated between.
-	//X is the fraction of difference between A and B.
-	private float smoothInterpolate (float a, float b, float x)
-	{
-		float ft = x * 3.1415927f;
-		float f = (float)(1 - Math.Cos (ft)) * 0.5f;
-		
-		return  (float)(a * (1 - f) + b * f);
-	}
-	
-	private float interpolate(float a, float b, float x){
-		return a*(1f-x) + b*x;
 	}
 }
