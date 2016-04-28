@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 
 [ExecuteInEditMode]
-public class GeneratorWithTextureTest : MonoBehaviour
+public class GenerateTextureNumberNoise : MonoBehaviour
 {
 	bool runNow;
 	bool extraRun = true;
@@ -29,6 +29,7 @@ public class GeneratorWithTextureTest : MonoBehaviour
 	private float[, ] samples9;
 	private int[,] colorMap;
 	private Texture2D tex;
+	private float[, ] pixelDistances;
 	
 	//important note:
 	//boundary of map defined by:
@@ -39,8 +40,8 @@ public class GeneratorWithTextureTest : MonoBehaviour
 		Field,
 		Mountain,
 		Water,
-		City }
-	;
+		City 
+	};
 	
 	// Use this for initialization
 	void Start ()
@@ -50,9 +51,12 @@ public class GeneratorWithTextureTest : MonoBehaviour
 
 		colorMap = new int[width, length];
 		
+		pixelDistances = new float[width, length];
+
 		tex = Resources.Load("InputPictureG") as Texture2D;
 
 		matSizes = new int[10];
+
 		for (int mats = 0; mats < (matSizes.GetLength(0)); mats++) {
 			matSizes [mats] = 4 * ((int)Math.Pow (2, mats));
 		}
@@ -81,6 +85,8 @@ public class GeneratorWithTextureTest : MonoBehaviour
 		print ("Start running processor melting program.");
 		
 		setColors();
+
+		setDistances ();
 		
 		//create Simplex Noise matrix
 		createSimplexMatrix ();
@@ -156,7 +162,45 @@ public class GeneratorWithTextureTest : MonoBehaviour
 			loopY++;
 		}
 	}
-	
+
+	void setDistances ()
+	{
+		for(int y = 0; y < pixelDistances.GetLength(0); y++)
+		{
+			for(int x = 0; x < pixelDistances.GetLength(1); x++)
+			{
+				if(colorMap[y, x]== (int) ground.Mountain){
+					if(y==0 || x==0){
+						pixelDistances[y, x] = 1;
+					}
+					else if(colorMap[y, x-1] == (int) ground.Mountain){
+						pixelDistances[y, x] = pixelDistances[y, x-1];
+					}
+					else{
+						pixelDistances[y, x] = 1;
+					}
+				}
+			}
+		}
+
+		for(int y = pixelDistances.GetLength(0)-1; y >= 0; y--)
+		{
+			for(int x = pixelDistances.GetLength(1)-1; x >= 0; x--)
+			{
+				if(colorMap[y, x]== (int) ground.Mountain){
+					if(y == pixelDistances.GetLength(0)-1 || x == pixelDistances.GetLength(1)-1){
+						pixelDistances[y, x] = 1;
+					}
+					else if(colorMap[y, x+1] == (int) ground.Mountain){
+						pixelDistances[y, x] = pixelDistances[y, x+1];
+					}
+					else{
+						pixelDistances[y, x] = 1;
+					}
+				}
+			}
+		}
+	}
 	
 	/// <summary>
 	/// ######################
