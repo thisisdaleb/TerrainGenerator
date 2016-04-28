@@ -274,8 +274,8 @@ public class GenGuidedTerrainTextureTest : MonoBehaviour
 		TerrainData terrainData = new TerrainData ();
 		
 		terrainData.heightmapResolution = width;
-		terrainData.baseMapResolution = 1024;
-		terrainData.SetDetailResolution (1024, 16);
+		terrainData.baseMapResolution = 2048;
+		terrainData.SetDetailResolution (2048, 16);
 		
 		terrainData.SetHeights (0, 0, finalHeightMap);
 		terrainData.size = new Vector3 (terrainWidth, terrainHeight, terrainLength);
