@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Linq; // used for Sum of array
 
+[ExecuteInEditMode]
 public class AssignSplatMap : MonoBehaviour {
 	
 	void Start () {

@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 
 [ExecuteInEditMode]
-public class GenGuidedTerrainTextureTest : MonoBehaviour
+public class GenCartoon1 : MonoBehaviour
 {
 	bool runNow;
 	bool extraRun = true;
@@ -20,6 +20,7 @@ public class GenGuidedTerrainTextureTest : MonoBehaviour
 	private float[, ] pixelDistances;
 	SplatPrototype[] terrainTexs;
 	private Texture2D[] textureList;
+	private Boolean[,] fieldBorderType;
 
 	//important note:
 	//boundary of map defined by:
@@ -42,6 +43,8 @@ public class GenGuidedTerrainTextureTest : MonoBehaviour
 		colorMap = new int[width, length];
 		
 		pixelDistances = new float[width, length];
+
+		fieldBorderType = new Boolean[width, length];
 		
 		tex = Resources.Load("InputPictureG") as Texture2D;
 
@@ -125,7 +128,7 @@ public class GenGuidedTerrainTextureTest : MonoBehaviour
 							}
 							else
 							{ //city
-								colorMap[(yPlaced*loopY)+placeY, (xPlaced*loopX)+placeX] = (int) ground.City;
+								colorMap[(yPlaced*loopY)+placeY, (xPlaced*loopX)+placeX] = (int) ground.Field;
 							}
 						}
 						placeX++;
@@ -180,25 +183,38 @@ public class GenGuidedTerrainTextureTest : MonoBehaviour
 		}
 	}
 	
-	private void pixelTypeDistance(int y, int x, int movingY, int movingX, int groundType, Boolean secondRun){
-		if(colorMap[y, x]== groundType){
-			if(y==0 || x==0 || y == pixelDistances.GetLength(0)-1 || x == pixelDistances.GetLength(1)-1){
-				pixelDistances[y, x] = 1;
-			}
-			else if(colorMap[y+movingY, x+movingX] == (int) groundType){
-				if(secondRun || pixelDistances[y, x] >= pixelDistances[y+movingY, x+movingX])
-					pixelDistances[y, x] = pixelDistances[y+movingY, x+movingX]+1;
-			}
-			else{
-				pixelDistances[y, x] = 1;
+	private void pixelTypeDistance(int y, int x, int movingY, int movingX, int groundType, Boolean firstRun){
+		if (colorMap [y, x] == groundType) {
+			if (y == 0 || x == 0 || y == pixelDistances.GetLength (0) - 1 || x == pixelDistances.GetLength (1) - 1) {
+				pixelDistances [y, x] = 1;
+			} else if (colorMap [y + movingY, x + movingX] == (int)groundType) {
+				if (firstRun || pixelDistances [y, x] >= pixelDistances [y + movingY, x + movingX])
+					pixelDistances [y, x] = pixelDistances [y + movingY, x + movingX] + 1;
+			} else {
+				pixelDistances [y, x] = 1;
 			}
 		}
 	}
 	
-	
-	
-	private void fieldDistance(){
-		
+	private void fieldDistance(int y, int x, int movingY, int movingX, Boolean firstRun){
+		if(colorMap[y, x]== (int) ground.Field){
+			if(y==0 || x==0 || y == pixelDistances.GetLength(0)-1 || x == pixelDistances.GetLength(1)-1){
+				pixelDistances[y, x] = 1;
+				fieldBorderType[y, x] = true;
+			}
+			else if(colorMap[y+movingY, x+movingX] == (int) ground.Field){
+				if(firstRun || pixelDistances[y, x] >= pixelDistances[y+movingY, x+movingX]){
+					pixelDistances[y, x] = pixelDistances[y+movingY, x+movingX]+1;
+					fieldBorderType[y, x] = fieldBorderType[+movingY, x+movingX];
+				}
+			}
+			else if(colorMap[y+movingY, x+movingX] == (int) ground.Field){
+				if(firstRun || pixelDistances[y, x] >= pixelDistances[y+movingY, x+movingX]){
+					pixelDistances[y, x] = pixelDistances[y+movingY, x+movingX]+1;
+					fieldBorderType[y, x] = fieldBorderType[+movingY, x+movingX];
+				}
+			}
+		}
 	}
 	
 	private void createFloatMatrix ()
