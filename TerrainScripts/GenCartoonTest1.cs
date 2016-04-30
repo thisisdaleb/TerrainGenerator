@@ -239,12 +239,20 @@ public class GenCartoonTest1 : MonoBehaviour
 			for (int x = 0; x < width-1; x++) {
 				
 				if(colorMap[y, x] == (int) ground.Field){ //field
-					if(fieldEdgeTypes[y, x] == true)
-						finalHeightMap[y, x] = 0.2f;
-					else
-						finalHeightMap[y, x] = 0.0f;
+					if(fieldEdgeTypes[y, x] == true){
+						if(pixelDistances[y, x]<51)
+							finalHeightMap[y, x] = 0.15f + smoothInterpolate(50f, 0f, pixelDistances[y,x]/50f)/500f;
+						else
+							finalHeightMap[y, x] = 0.15f;
+					}
+					else{
+						if(pixelDistances[y, x]<151)
+							finalHeightMap[y, x] = 0.0f + smoothInterpolate(0f, 150f, pixelDistances[y,x]/150f)/150f*(15f/100f);
+						else
+							finalHeightMap[y, x] = 0.15f;
+					}
 				}else if(colorMap[y, x] == (int) ground.Mountain){ //mountains
-					finalHeightMap[y, x] = 0.2f + (float)(pixelDistances[y, x])*0.02f;
+					finalHeightMap[y, x] = 0.25f + (float)(pixelDistances[y, x])*0.02f;
 					
 				}else if(colorMap[y, x] == (int) ground.Water){ //water 
 					finalHeightMap[y, x] = 0.0f - (float)(pixelDistances[y, x])*0.005f;
@@ -318,5 +326,13 @@ public class GenCartoonTest1 : MonoBehaviour
 		GameObject go = Terrain.CreateTerrainGameObject (terrainData);
 		go.transform.position.Set (0, 0, 0);
 		print ("It made it to the end");
+	}
+
+	private float smoothInterpolate (float a, float b, float x)
+	{
+		float ft = x * 3.1415927f;
+		float f = (float)(1 - Math.Cos (ft)) * 0.5f;
+		
+		return  (float)(a * (1 - f) + b * f);
 	}
 }
