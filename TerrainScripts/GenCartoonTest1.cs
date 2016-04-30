@@ -130,7 +130,7 @@ public class GenCartoonTest1 : MonoBehaviour
 							}
 							else
 							{ //city
-								colorMap[(yPlaced*loopY)+placeY, (xPlaced*loopX)+placeX] = (int) ground.City;
+								colorMap[(yPlaced*loopY)+placeY, (xPlaced*loopX)+placeX] = (int) ground.Field;
 							}
 						}
 						placeX++;
@@ -212,7 +212,6 @@ public class GenCartoonTest1 : MonoBehaviour
 				fieldEdgeTypes[y, x] = true; 
 				//true = Mountain Edge
 				//false = Water Edge
-
 			}
 			else if(colorMap[y+movingY, x+movingX] == (int) ground.Field){
 				if(firstRun || pixelDistances[y, x] > pixelDistances[y+movingY, x+movingX]){
@@ -222,9 +221,9 @@ public class GenCartoonTest1 : MonoBehaviour
 			}
 			else{
 				pixelDistances[y, x] = 1;
-				if(colorMap[y, x] == (int) ground.Mountain)
+				if(colorMap[y+movingY, x+movingX] == (int) ground.Mountain)
 					fieldEdgeTypes[y, x] = true;
-				else
+				else if(colorMap[y+movingY, x+movingX] == (int) ground.Water)
 					fieldEdgeTypes[y, x] = false;
 			}
 		}
