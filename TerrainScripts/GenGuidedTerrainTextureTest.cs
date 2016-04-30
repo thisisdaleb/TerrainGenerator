@@ -6,7 +6,7 @@ using System.Collections.Generic;
 [ExecuteInEditMode]
 public class GenGuidedTerrainTextureTest : MonoBehaviour
 {
-	bool runNow;
+	public bool runNow;
 	bool extraRun = true;
 	private int[,] initColorMap;
 	private int width = 2049; //These 2 defined by input! Each terrain 4097 pixels wide and long
@@ -16,7 +16,7 @@ public class GenGuidedTerrainTextureTest : MonoBehaviour
 	private int terrainHeight = 2000; //defines the maximum possible height of the terrain
 	private int terrainLength = 10000; //defines the length of the terrain in meters
 	private int[,] colorMap;
-	private Texture2D tex;
+	public Texture2D tex;
 	private float[, ] pixelDistances;
 	SplatPrototype[] terrainTexs;
 	private Texture2D[] textureList;
@@ -36,24 +36,7 @@ public class GenGuidedTerrainTextureTest : MonoBehaviour
 	// Use this for initialization
 	void Start ()
 	{
-		length = width;
-		runNow = true;
-		
-		colorMap = new int[width, length];
-		
-		pixelDistances = new float[width, length];
-		
-		tex = Resources.Load("InputPictureG") as Texture2D;
-
-		textureList = new Texture2D[3];
-
-		textureList[0] =  Resources.Load("GrassB") as Texture2D;
-
-		textureList[1] =  Resources.Load("MountainTexture") as Texture2D;
-
-		textureList[2] =  Resources.Load("Snow") as Texture2D;
-
-		terrainTexs = new SplatPrototype [3];
+		refreshVariables ();
 	}
 	
 	// Update is called once per frame
@@ -81,6 +64,28 @@ public class GenGuidedTerrainTextureTest : MonoBehaviour
 		
 		runNow = false;
 		extraRun = false;
+		refreshVariables ();
+	}
+
+	void refreshVariables(){
+		length = width;
+		runNow = false;
+		
+		colorMap = new int[width, length];
+		
+		pixelDistances = new float[width, length];
+		
+		tex = Resources.Load("InputPictureG") as Texture2D;
+		
+		textureList = new Texture2D[3];
+		
+		textureList[0] =  Resources.Load("GrassB") as Texture2D;
+		
+		textureList[1] =  Resources.Load("MountainTexture") as Texture2D;
+		
+		textureList[2] =  Resources.Load("Snow") as Texture2D;
+		
+		terrainTexs = new SplatPrototype [3];
 	}
 	
 	void setColors ()
@@ -116,7 +121,6 @@ public class GenGuidedTerrainTextureTest : MonoBehaviour
 							else if(tex.GetPixel(loopX, loopY).r > 0.7)
 							{ //mountains
 								colorMap[(yPlaced*loopY)+placeY, (xPlaced*loopX)+placeX] = (int) ground.Mountain;
-								
 							}
 							else if(tex.GetPixel(loopX, loopY).b > 0.7)
 							{ //water 
@@ -152,7 +156,7 @@ public class GenGuidedTerrainTextureTest : MonoBehaviour
 			}
 		}
 		
-		for(int y = pixelDistances.GetLength(0)-1; y >= 0; y--)
+		for(int  y = 0; y < pixelDistances.GetLength(0); y++)
 		{
 			for(int x = pixelDistances.GetLength(1)-1; x >= 0; x--)
 			{
@@ -160,46 +164,41 @@ public class GenGuidedTerrainTextureTest : MonoBehaviour
 				pixelTypeDistance(y, x, 0, 1, (int) ground.Water, false);
 			}
 		}
-
-		for(int y = 0; y < pixelDistances.GetLength(0); y++)
+		
+		for(int x = 0; x < pixelDistances.GetLength(1); x++)
 		{
-			for(int x = 0; x < pixelDistances.GetLength(1); x++)
+			for(int y = 0; y < pixelDistances.GetLength(0); y++)
 			{
 				pixelTypeDistance(y, x, -1, 0, (int) ground.Mountain, false);
 				pixelTypeDistance(y, x, -1, 0, (int) ground.Water, false);
 			}
 		}
-
-		for(int y = pixelDistances.GetLength(0)-1; y >= 0; y--)
+		
+		for(int x = 0; x < pixelDistances.GetLength(1); x++)
 		{
-			for(int x = pixelDistances.GetLength(1)-1; x >= 0; x--)
+			for(int y = pixelDistances.GetLength(0)-1; y >= 0; y--)
 			{
 				pixelTypeDistance(y, x, 1, 0, (int) ground.Mountain, false);
 				pixelTypeDistance(y, x, 1, 0, (int) ground.Water, false);
 			}
 		}
+
 	}
 	
-	private void pixelTypeDistance(int y, int x, int movingY, int movingX, int groundType, Boolean secondRun){
+	private void pixelTypeDistance(int y, int x, int movingY, int movingX, int groundType, Boolean firstRun){
 		if(colorMap[y, x]== groundType){
 			if(y==0 || x==0 || y == pixelDistances.GetLength(0)-1 || x == pixelDistances.GetLength(1)-1){
-				pixelDistances[y, x] = 1;
+				pixelDistances[y, x] = 10;
 			}
 			else if(colorMap[y+movingY, x+movingX] == (int) groundType){
-				if(secondRun || pixelDistances[y, x] >= pixelDistances[y+movingY, x+movingX])
+				if(firstRun || pixelDistances[y, x] > pixelDistances[y+movingY, x+movingX])
 					pixelDistances[y, x] = pixelDistances[y+movingY, x+movingX]+1;
 			}
 			else{
 				pixelDistances[y, x] = 1;
 			}
 		}
-	}
-	
-	
-	
-	private void fieldDistance(){
-		
-	}
+	}	
 	
 	private void createFloatMatrix ()
 	{
@@ -219,7 +218,7 @@ public class GenGuidedTerrainTextureTest : MonoBehaviour
 					finalHeightMap[y, x] = 0.0f + (float)(pixelDistances[y, x])*0.02f;
 					
 				}else if(colorMap[y, x] == (int) ground.Water){ //water 
-					finalHeightMap[y, x] = 0.0f - (float)(pixelDistances[y, x])*0.01f;
+					finalHeightMap[y, x] = 0.0f - (float)(pixelDistances[y, x])*0.005f;
 				}
 				else{ //city
 					finalHeightMap[y, x] = 0.0f;

@@ -4,10 +4,9 @@ using System;
 using System.Collections.Generic;
 
 [ExecuteInEditMode]
-public class GenCartoon1 : MonoBehaviour
+public class GenCartoonTest1 : MonoBehaviour
 {
-	bool runNow;
-	bool extraRun = true;
+	public bool runNow;
 	private int[,] initColorMap;
 	private int width = 2049; //These 2 defined by input! Each terrain 4097 pixels wide and long
 	private int length; //Input is amount of tiles in width and length (Ex: 2x3 tiles)
@@ -16,11 +15,11 @@ public class GenCartoon1 : MonoBehaviour
 	private int terrainHeight = 2000; //defines the maximum possible height of the terrain
 	private int terrainLength = 10000; //defines the length of the terrain in meters
 	private int[,] colorMap;
-	private Texture2D tex;
+	public Texture2D tex;
 	private float[, ] pixelDistances;
+	private Boolean[, ] fieldEdgeTypes;
 	SplatPrototype[] terrainTexs;
 	private Texture2D[] textureList;
-	private Boolean[,] fieldBorderType;
 
 	//important note:
 	//boundary of map defined by:
@@ -37,32 +36,13 @@ public class GenCartoon1 : MonoBehaviour
 	// Use this for initialization
 	void Start ()
 	{
-		length = width;
-		runNow = true;
-		
-		colorMap = new int[width, length];
-		
-		pixelDistances = new float[width, length];
-
-		fieldBorderType = new Boolean[width, length];
-		
-		tex = Resources.Load("InputPictureG") as Texture2D;
-
-		textureList = new Texture2D[3];
-
-		textureList[0] =  Resources.Load("GrassB") as Texture2D;
-
-		textureList[1] =  Resources.Load("MountainTexture") as Texture2D;
-
-		textureList[2] =  Resources.Load("Snow") as Texture2D;
-
-		terrainTexs = new SplatPrototype [3];
+		refreshVariables ();
 	}
 	
 	// Update is called once per frame
 	void Update ()
 	{
-		if (runNow && extraRun) {
+		if (runNow) {
 			convertInputIntoMap ();
 		}
 	}
@@ -83,7 +63,30 @@ public class GenCartoon1 : MonoBehaviour
 		createTerrain ();
 		
 		runNow = false;
-		extraRun = false;
+		refreshVariables ();
+	}
+
+	void refreshVariables(){
+		length = width;
+		runNow = false;
+		
+		colorMap = new int[width, length];
+		
+		pixelDistances = new float[width, length];
+
+		fieldEdgeTypes = new Boolean[width, length];
+		
+		tex = Resources.Load("InputPictureG") as Texture2D;
+		
+		textureList = new Texture2D[3];
+		
+		textureList[0] =  Resources.Load("GrassB") as Texture2D;
+		
+		textureList[1] =  Resources.Load("MountainTexture") as Texture2D;
+		
+		textureList[2] =  Resources.Load("Snow") as Texture2D;
+		
+		terrainTexs = new SplatPrototype [3];
 	}
 	
 	void setColors ()
@@ -119,7 +122,6 @@ public class GenCartoon1 : MonoBehaviour
 							else if(tex.GetPixel(loopX, loopY).r > 0.7)
 							{ //mountains
 								colorMap[(yPlaced*loopY)+placeY, (xPlaced*loopX)+placeX] = (int) ground.Mountain;
-								
 							}
 							else if(tex.GetPixel(loopX, loopY).b > 0.7)
 							{ //water 
@@ -128,7 +130,7 @@ public class GenCartoon1 : MonoBehaviour
 							}
 							else
 							{ //city
-								colorMap[(yPlaced*loopY)+placeY, (xPlaced*loopX)+placeX] = (int) ground.Field;
+								colorMap[(yPlaced*loopY)+placeY, (xPlaced*loopX)+placeX] = (int) ground.City;
 							}
 						}
 						placeX++;
@@ -152,75 +154,84 @@ public class GenCartoon1 : MonoBehaviour
 			{
 				pixelTypeDistance(y, x, 0, -1, (int) ground.Mountain, true);
 				pixelTypeDistance(y, x, 0, -1, (int) ground.Water, true);
+				fieldDistance(y, x, 0, -1, true);
 			}
 		}
 		
-		for(int y = pixelDistances.GetLength(0)-1; y >= 0; y--)
+		for(int  y = 0; y < pixelDistances.GetLength(0); y++)
 		{
 			for(int x = pixelDistances.GetLength(1)-1; x >= 0; x--)
 			{
 				pixelTypeDistance(y, x, 0, 1, (int) ground.Mountain, false);
 				pixelTypeDistance(y, x, 0, 1, (int) ground.Water, false);
+				fieldDistance(y, x, 0, 1, false);
 			}
 		}
-
-		for(int y = 0; y < pixelDistances.GetLength(0); y++)
+		
+		for(int x = 0; x < pixelDistances.GetLength(1); x++)
 		{
-			for(int x = 0; x < pixelDistances.GetLength(1); x++)
+			for(int y = 0; y < pixelDistances.GetLength(0); y++)
 			{
 				pixelTypeDistance(y, x, -1, 0, (int) ground.Mountain, false);
 				pixelTypeDistance(y, x, -1, 0, (int) ground.Water, false);
+				fieldDistance(y, x, -1, 0, false);
 			}
 		}
-
-		for(int y = pixelDistances.GetLength(0)-1; y >= 0; y--)
+		
+		for(int x = 0; x < pixelDistances.GetLength(1); x++)
 		{
-			for(int x = pixelDistances.GetLength(1)-1; x >= 0; x--)
+			for(int y = pixelDistances.GetLength(0)-1; y >= 0; y--)
 			{
 				pixelTypeDistance(y, x, 1, 0, (int) ground.Mountain, false);
 				pixelTypeDistance(y, x, 1, 0, (int) ground.Water, false);
+				fieldDistance(y, x, 1, 0, false);
 			}
 		}
+
 	}
 	
 	private void pixelTypeDistance(int y, int x, int movingY, int movingX, int groundType, Boolean firstRun){
-		if (colorMap [y, x] == groundType) {
-			if (y == 0 || x == 0 || y == pixelDistances.GetLength (0) - 1 || x == pixelDistances.GetLength (1) - 1) {
-				pixelDistances [y, x] = 1;
-			} else if (colorMap [y + movingY, x + movingX] == (int)groundType) {
-				if (firstRun || pixelDistances [y, x] >= pixelDistances [y + movingY, x + movingX])
-					pixelDistances [y, x] = pixelDistances [y + movingY, x + movingX] + 1;
-			} else {
-				pixelDistances [y, x] = 1;
+		if(colorMap[y, x]== groundType){
+			if(y==0 || x==0 || y == pixelDistances.GetLength(0)-1 || x == pixelDistances.GetLength(1)-1){
+				pixelDistances[y, x] = 10;
+			}
+			else if(colorMap[y+movingY, x+movingX] == groundType){
+				if(firstRun || pixelDistances[y, x] > pixelDistances[y+movingY, x+movingX])
+					pixelDistances[y, x] = pixelDistances[y+movingY, x+movingX]+1;
+			}
+			else{
+				pixelDistances[y, x] = 1;
 			}
 		}
 	}
-	
+
 	private void fieldDistance(int y, int x, int movingY, int movingX, Boolean firstRun){
 		if(colorMap[y, x]== (int) ground.Field){
 			if(y==0 || x==0 || y == pixelDistances.GetLength(0)-1 || x == pixelDistances.GetLength(1)-1){
 				pixelDistances[y, x] = 1;
-				fieldBorderType[y, x] = true;
+				fieldEdgeTypes[y, x] = true; 
+				//true = Mountain Edge
+				//false = Water Edge
+
 			}
 			else if(colorMap[y+movingY, x+movingX] == (int) ground.Field){
-				if(firstRun || pixelDistances[y, x] >= pixelDistances[y+movingY, x+movingX]){
+				if(firstRun || pixelDistances[y, x] > pixelDistances[y+movingY, x+movingX]){
 					pixelDistances[y, x] = pixelDistances[y+movingY, x+movingX]+1;
-					fieldBorderType[y, x] = fieldBorderType[+movingY, x+movingX];
+					fieldEdgeTypes[y, x] = fieldEdgeTypes[y+movingY, x+movingX]; 
 				}
 			}
-			else if(colorMap[y+movingY, x+movingX] == (int) ground.Field){
-				if(firstRun || pixelDistances[y, x] >= pixelDistances[y+movingY, x+movingX]){
-					pixelDistances[y, x] = pixelDistances[y+movingY, x+movingX]+1;
-					fieldBorderType[y, x] = fieldBorderType[+movingY, x+movingX];
-				}
+			else{
+				pixelDistances[y, x] = 1;
+				if(colorMap[y, x] == (int) ground.Mountain)
+					fieldEdgeTypes[y, x] = true;
+				else
+					fieldEdgeTypes[y, x] = false;
 			}
 		}
 	}
 	
 	private void createFloatMatrix ()
 	{
-		
-		print ("Mountain Height check  " + pixelDistances[5, 5]);
 		
 		finalHeightMap = new float[length, width];
 		
@@ -229,13 +240,15 @@ public class GenCartoon1 : MonoBehaviour
 			for (int x = 0; x < width-1; x++) {
 				
 				if(colorMap[y, x] == (int) ground.Field){ //field
-					finalHeightMap[y, x] = 0.0f;
-					
+					if(fieldEdgeTypes[y, x] == true)
+						finalHeightMap[y, x] = 0.2f;
+					else
+						finalHeightMap[y, x] = 0.0f;
 				}else if(colorMap[y, x] == (int) ground.Mountain){ //mountains
-					finalHeightMap[y, x] = 0.0f + (float)(pixelDistances[y, x])*0.02f;
+					finalHeightMap[y, x] = 0.2f + (float)(pixelDistances[y, x])*0.02f;
 					
 				}else if(colorMap[y, x] == (int) ground.Water){ //water 
-					finalHeightMap[y, x] = 0.0f - (float)(pixelDistances[y, x])*0.01f;
+					finalHeightMap[y, x] = 0.0f - (float)(pixelDistances[y, x])*0.005f;
 				}
 				else{ //city
 					finalHeightMap[y, x] = 0.0f;
@@ -285,11 +298,6 @@ public class GenCartoon1 : MonoBehaviour
 		terrainTexs [2].tileSize = new Vector2 (15, 15);
 	}
 	
-	private void placeTextures ()
-	{
-
-	}
-	
 	private void createTerrain ()
 	{
 		TerrainData terrainData = new TerrainData ();
@@ -305,9 +313,7 @@ public class GenCartoon1 : MonoBehaviour
 		createTextures ();
 
 		terrainData.splatPrototypes = terrainTexs;
-		
-		
-		placeTextures ();
+
 		//terrainData.treePrototypes = m_treeProtoTypes;
 		//terrainData.detailPrototypes = m_detailProtoTypes;
 		GameObject go = Terrain.CreateTerrainGameObject (terrainData);

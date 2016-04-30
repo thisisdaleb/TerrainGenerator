@@ -6,15 +6,16 @@ using System.Collections.Generic;
 [ExecuteInEditMode]
 public class TerrainGeneratorSetPersistence : MonoBehaviour
 {
-	bool runNow;
+	public bool runNow;
+	public float perst;
 	bool extraRun = true;
 	private int[,] initColorMap;
 	private int width = 2049; //These 2 defined by input! Each terrain 4097 pixels wide and long
 	private int length; //Input is amount of tiles in width and length (Ex: 2x3 tiles)
 	private float[,] finalHeightMap; //defines the elevation of each height point between 0.0 and 1.0
-	private int terrainWidth = 30000; //defines the width of the terrain in meters
-	private int terrainHeight = 4000; //defines the maximum possible height of the terrain
-	private int terrainLength = 30000; //defines the length of the terrain in meters
+	private int terrainWidth = 5000; //defines the width of the terrain in meters
+	private int terrainHeight = 1000; //defines the maximum possible height of the terrain
+	private int terrainLength = 4000; //defines the length of the terrain in meters
 	private SimplexNoiseGenerator simplex;
 	private List<float[,]> noiseMat;
 	private int[] matSizes;
@@ -45,7 +46,7 @@ public class TerrainGeneratorSetPersistence : MonoBehaviour
 	void Start ()
 	{
 		length = width;
-		runNow = true;
+		runNow = false;
 		matSizes = new int[10];
 		for (int mats = 0; mats < (matSizes.GetLength(0)); mats++) {
 			matSizes [mats] = 4 * ((int)Math.Pow (2, mats));
@@ -61,6 +62,9 @@ public class TerrainGeneratorSetPersistence : MonoBehaviour
 		samples7 = new float[width, width];
 		samples8 = new float[width, width];
 		samples9 = new float[width, width];
+
+		//Fraction of how much each level of noise is worth compared to the next level
+		perst = 0.4f; 
 	}
 	
 	// Update is called once per frame
@@ -159,11 +163,7 @@ public class TerrainGeneratorSetPersistence : MonoBehaviour
 	
 	private void createFloatMatrix ()
 	{
-		float[] persistence = new float[10]; 
-
-		//Fraction of how much each level of noise is worth compared to the next level
-		float perst = 0.4f; 
-
+		float[] persistence = new float[10];
 
 		finalHeightMap = new float[length, width];
 		if (width > 4000) {
@@ -198,7 +198,7 @@ public class TerrainGeneratorSetPersistence : MonoBehaviour
 			samples7 = smartestInterpolation (noiseMat [7], 3);
 		}
 
-		for (int z = 0; z < 8; z++) {
+		for (int z = 0; z < 10; z++) {
 			persistence[z] = (float)(Math.Pow (perst, z));
 		}
 		

@@ -3,8 +3,8 @@ using System.Collections;
 using System.Linq; // used for Sum of array
 
 [ExecuteInEditMode]
-public class AssignSplatMap : MonoBehaviour {
-	
+public class SplatMapPlacer : MonoBehaviour {
+
 	void Start () {
 		// Get the attached terrain component
 		Terrain terrain = GetComponent<Terrain>();
@@ -26,6 +26,12 @@ public class AssignSplatMap : MonoBehaviour {
 				// Sample the height at this location (note GetHeight expects int coordinates corresponding to locations in the heightmap array)
 				float height = terrainData.GetHeight(Mathf.RoundToInt(y_01 * terrainData.heightmapHeight),Mathf.RoundToInt(x_01 * terrainData.heightmapWidth) );
 				
+				// Calculate the normal of the terrain (note this is in normalised coordinates relative to the overall terrain dimensions)
+				//Vector3 normal = terrainData.GetInterpolatedNormal(y_01,x_01);
+				
+				// Calculate the steepness of the terrain
+				//float steepness = terrainData.GetSteepness(y_01,x_01);
+				
 				// Setup an array to record the mix of texture weights at this point
 				float[] splatWeights = new float[terrainData.alphamapLayers];
 				
@@ -36,17 +42,21 @@ public class AssignSplatMap : MonoBehaviour {
 				
 				// Texture[1] is stronger at lower altitudes
 				//splatWeights[1] = Mathf.Clamp01((terrainData.heightmapHeight - height));
-				if(height > 1756f || height < 1740f){
-					splatWeights[0] = 0f;
-					splatWeights [1] = 1f; 
-					splatWeights[2] = 0f;
-				}
-				else{
+
+				//Field
+				if(height > terrainData.heightmapHeight*0.422f && height < terrainData.heightmapHeight*0.429f){
 					splatWeights[0] = 1f;
-					splatWeights[1] = 0f;
+					splatWeights [1] = 0f; 
 					splatWeights[2] = 0f;
 				}
-				if(height > 3000f){
+				//Mountain
+				else{
+					splatWeights[0] = 0f;
+					splatWeights[1] = 1f;
+					splatWeights[2] = 0f;
+				}
+				//snow
+				if(height > terrainData.heightmapHeight*1.2){
 					splatWeights[0] = 0f;
 					splatWeights [1] = 0f; 
 					splatWeights[2] = 1f;
