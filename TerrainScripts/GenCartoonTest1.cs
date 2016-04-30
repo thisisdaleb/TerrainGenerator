@@ -11,9 +11,9 @@ public class GenCartoonTest1 : MonoBehaviour
 	private int width = 2049; //These 2 defined by input! Each terrain 4097 pixels wide and long
 	private int length; //Input is amount of tiles in width and length (Ex: 2x3 tiles)
 	private float[,] finalHeightMap; //defines the elevation of each height point between 0.0 and 1.0
-	private int terrainWidth = 14000; //defines the width of the terrain in meters
+	public int terrainWidth = 10000; //defines the width of the terrain in meters
 	private int terrainHeight = 2000; //defines the maximum possible height of the terrain
-	private int terrainLength = 10000; //defines the length of the terrain in meters
+	public int terrainLength = 10000; //defines the length of the terrain in meters
 	private int[,] colorMap;
 	public Texture2D tex;
 	private float[, ] pixelDistances;
@@ -241,18 +241,18 @@ public class GenCartoonTest1 : MonoBehaviour
 				if(colorMap[y, x] == (int) ground.Field){ //field
 					if(fieldEdgeTypes[y, x] == true){
 						if(pixelDistances[y, x]<51)
-							finalHeightMap[y, x] = 0.15f + smoothInterpolate(50f, 0f, pixelDistances[y,x]/50f)/500f;
+							finalHeightMap[y, x] = 0.1f + smoothInterpolate(50f, 0f, pixelDistances[y,x]/50f)/500f;
 						else
-							finalHeightMap[y, x] = 0.15f;
+							finalHeightMap[y, x] = 0.1f;
 					}
 					else{
-						if(pixelDistances[y, x]<151)
-							finalHeightMap[y, x] = 0.0f + smoothInterpolate(0f, 150f, pixelDistances[y,x]/150f)/150f*(15f/100f);
+						if(pixelDistances[y, x]<101)
+							finalHeightMap[y, x] = 0.0f + smoothInterpolate(0f, 100f, pixelDistances[y,x]/100f)/100f*0.1f;
 						else
-							finalHeightMap[y, x] = 0.15f;
+							finalHeightMap[y, x] = 0.1f;
 					}
 				}else if(colorMap[y, x] == (int) ground.Mountain){ //mountains
-					finalHeightMap[y, x] = 0.25f + (float)(pixelDistances[y, x])*0.02f;
+					finalHeightMap[y, x] = 0.2f + (float)(pixelDistances[y, x])*0.02f;
 					
 				}else if(colorMap[y, x] == (int) ground.Water){ //water 
 					finalHeightMap[y, x] = 0.0f - (float)(pixelDistances[y, x])*0.005f;
