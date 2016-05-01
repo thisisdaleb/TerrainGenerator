@@ -360,6 +360,10 @@ public class GenCartoonTest4 : MonoBehaviour
 	{
 		SplatMapCreator spatMapper = new SplatMapCreator ();
 		spatMapper.startTerrainPlacing (terrainData);
+
+		GameObject go = (GameObject)Instantiate(Resources.Load("WATERTIME"));
+		go.transform.position = (new Vector3 (4000f, (float) waterHeight - 3f, 4000f));
+		go.transform.localScale = new Vector3 (5000f, 0.001f, 5000f);
 	}
 	
 	private void createTerrain ()

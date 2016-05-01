@@ -2,13 +2,7 @@
 using System.Collections;
 using System.Linq; // used for Sum of array
 
-[ExecuteInEditMode]
-public class SplatMapCreator : MonoBehaviour {
-
-	void Start () {
-		GameObject go = (GameObject)Instantiate(Resources.Load("WATERTIME"));
-		go.transform.Translate (new Vector3 (0, 400, 0));
-	}
+public class SplatMapCreator {
 	
 	public void startTerrainPlacing(TerrainData terrainData){
 
@@ -17,8 +11,6 @@ public class SplatMapCreator : MonoBehaviour {
 		
 		
 		Vector3 terrainDataSize = terrainData.size;
-		
-		print ("height " + terrainDataSize.y);
 		
 		for (int y = 0; y < terrainData.alphamapHeight; y++)
 		{
