@@ -27,6 +27,8 @@ public class GenCartoonTest4 : MonoBehaviour
 	//important note:
 	//boundary of map defined by:
 	//!((k+y) < 0 || (k + y) > (length-1) || (z + x) < 0 || (z + x) > (width-1))
+
+	//Might need to switch to Unity 5 to get rid of water issues
 	
 	enum ground : int
 	{
