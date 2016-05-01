@@ -3,23 +3,23 @@ using System.Collections;
 using System.Linq; // used for Sum of array
 
 [ExecuteInEditMode]
-public class SplatMapWoo : MonoBehaviour {
+public class SplatMapCreator : MonoBehaviour {
 
 	void Start () {
-		// Get the attached terrain component
-		Terrain terrain = GetComponent<Terrain>();
-		
-		// Get a reference to the terrain data
-		TerrainData terrainData = terrain.terrainData;
-		
+		GameObject go = (GameObject)Instantiate(Resources.Load("WATERTIME"));
+		go.transform.Translate (new Vector3 (0, 400, 0));
+	}
+	
+	public void startTerrainPlacing(TerrainData terrainData){
+
 		// Splatmap data is stored internally as a 3d array of floats, so declare a new empty array ready for your custom splatmap data:
 		float[, ,] splatmapData = new float[terrainData.alphamapWidth, terrainData.alphamapHeight, terrainData.alphamapLayers];
-
-
-		Vector3 terrainDataSize = terrain.terrainData.size;
-
+		
+		
+		Vector3 terrainDataSize = terrainData.size;
+		
 		print ("height " + terrainDataSize.y);
-
+		
 		for (int y = 0; y < terrainData.alphamapHeight; y++)
 		{
 			for (int x = 0; x < terrainData.alphamapWidth; x++)
@@ -47,7 +47,7 @@ public class SplatMapWoo : MonoBehaviour {
 				
 				// Texture[1] is stronger at lower altitudes
 				//splatWeights[1] = Mathf.Clamp01((terrainData.heightmapHeight - height));
-
+				
 				//Field
 				if(steepness>25f){
 					splatWeights[0] = 0f;
