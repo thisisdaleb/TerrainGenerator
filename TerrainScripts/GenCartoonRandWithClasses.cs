@@ -87,7 +87,7 @@ public class GenCartoonRandWithClasses : MonoBehaviour
 	{
 		print ("Start running processor melting program.");
 		
-		ImageDistances setImage = new ImageDistances ();
+		ImageDistancesStrongOutside setImage = new ImageDistancesStrongOutside ();
 		setImage.setColors (tex, width, length, pixelDistances, colorMap, fieldEdgeTypes);
 		
 		//create matrix of floats, set to the integer matrix where the minimum
