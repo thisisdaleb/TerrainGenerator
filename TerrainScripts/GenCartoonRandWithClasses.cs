@@ -185,10 +185,6 @@ public class GenCartoonRandWithClasses : MonoBehaviour
 		waterSpace = (float)(waterHeight) / (float)(terrainHeight);
 		float mountainSpace = (float)(mountainHeight) / (float)(terrainHeight);
 		fieldSpace = (float)(fieldHeight) / (float)(terrainHeight);
-
-		print ("bottom: " + waterSpace + " top: " + (fieldSpace+waterSpace));
-		print ("Min: " + mountainMin + " Max: " + (mountainMax));
-
 		
 		for (int y = 0; y < length-1; y++) {
 			for (int x = 0; x < width-1; x++) {
