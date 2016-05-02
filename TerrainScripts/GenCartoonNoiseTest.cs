@@ -1,10 +1,10 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System;
 using System.Collections.Generic;
 
 [ExecuteInEditMode]
-public class GenCartoonTest4 : MonoBehaviour
+public class GenCartoonNoiseTest : MonoBehaviour
 {
 	public bool runNow;
 	private int[,] initColorMap;
@@ -23,6 +23,14 @@ public class GenCartoonTest4 : MonoBehaviour
 	public int waterHeight = 400;
 	public int fieldHeight = 100;
 	public int mountainHeight = 2000;
+	private SimplexNoiseGenerator simplex;
+	private List<float[,]> noiseMat;
+	private int[] matSizes;
+	private float[, ] samples5;
+	private float[, ] samples6;
+	private float[, ] samples7;
+	private float[, ] samples8;
+	private float[, ] samples9;
 
 	//important note:
 	//boundary of map defined by:
@@ -68,6 +76,16 @@ public class GenCartoonTest4 : MonoBehaviour
 			terrainTexs = new SplatPrototype [4];
 		else	
 			terrainTexs = new SplatPrototype [3];
+
+		matSizes = new int[10];
+		for (int mats = 0; mats < (matSizes.GetLength(0)); mats++) {
+			matSizes [mats] = 4 * ((int)Math.Pow (2, mats));
+		}
+		samples5 = new float[width, width];
+		samples6 = new float[width, width];
+		samples7 = new float[width, width];
+		samples8 = new float[width, width];
+		samples9 = new float[width, width];
 	}
 	
 	// Update is called once per frame
@@ -88,6 +106,8 @@ public class GenCartoonTest4 : MonoBehaviour
 		setColors ();
 		
 		setDistances ();
+
+		createSimplexMatrix ();
 		
 		//create matrix of floats, set to the integer matrix where the minimum
 		//integer value is normalized to 0.0f and the maximum value is at 1.0f
@@ -98,6 +118,21 @@ public class GenCartoonTest4 : MonoBehaviour
 		
 		runNow = false;
 		refreshVariables ();
+	}
+
+	private void createSimplexMatrix ()
+	{
+		noiseMat = new List<float[,]> ();
+
+		for (int noiseNumber= 0; noiseNumber<10; noiseNumber++) {
+			simplex = new SimplexNoiseGenerator ((long)(UnityEngine.Random.Range (int.MinValue, int.MaxValue)));
+			noiseMat.Add (new float[matSizes [noiseNumber], matSizes [noiseNumber]]);
+			for (int y = 0; y < matSizes[noiseNumber]; y++) {
+				for (int x = 0; x < matSizes[noiseNumber]; x++) {
+					noiseMat [noiseNumber] [y, x] = (float)(simplex.Evaluate (x, y));
+				}
+			}
+		}
 	}
 
 	void setColors ()
@@ -188,7 +223,7 @@ public class GenCartoonTest4 : MonoBehaviour
 			for (int x = 0; x < pixelDistances.GetLength(1); x++) {
 				pixelTypeDistance (y, x, 0, -1, (int)ground.Mountain, false);
 				pixelTypeDistance (y, x, 0, -1, (int)ground.Water, false);
-				fieldDistance (y, x, 0, -1, false);
+				fieldDistance (y, x, 0, -1,  false);
 			}
 		}
 
@@ -231,9 +266,35 @@ public class GenCartoonTest4 : MonoBehaviour
 		}
 	}
 	
-	private void createFloatMatrix ()
-	{
-		
+	private void createFloatMatrix (){
+		float[] persistence = new float[10]; 
+
+		//Fraction of how much each level of noise is worth compared to the next level
+		float perst = 0.5f; 
+
+
+		finalHeightMap = new float[length, width];
+		if (width > 4000) {
+			samples5 = smartestInterpolation (noiseMat [5], 17 * 2);
+			samples6 = smartestInterpolation (noiseMat [6], 9 * 2);
+			samples7 = smartestInterpolation (noiseMat [7], 10);
+			samples8 = smartestInterpolation (noiseMat [8], 5);
+			samples9 = smartestInterpolation (noiseMat [9], 3);
+		} else if (width > 2000) {
+			samples5 = smartestInterpolation (noiseMat [5], 17);
+			samples6 = smartestInterpolation (noiseMat [6], 9);
+			samples7 = smartestInterpolation (noiseMat [7], 5);
+			samples8 = smartestInterpolation (noiseMat [8], 3);
+		} else {
+			samples5 = smartestInterpolation (noiseMat [5], 10);
+			samples6 = smartestInterpolation (noiseMat [6], 5);
+			samples7 = smartestInterpolation (noiseMat [7], 3);
+		}
+
+		for (int z = 0; z < 8; z++) {
+			persistence[z] = (float)(Math.Pow (perst, z));
+		}
+
 		finalHeightMap = new float[length, width];
 		
 		for (int y = 0; y < length-1; y++) {
@@ -258,13 +319,28 @@ public class GenCartoonTest4 : MonoBehaviour
 					finalHeightMap [y, x] = 0.0f + (float)(pixelDistances [y, x]-1) * 0.02f;
 					
 				} else if (colorMap [y, x] == (int)ground.Water) { //water 
-					finalHeightMap [y, x] = 0.0f + (float)(pixelDistances [y, x]-1) * 0.02f;
+					finalHeightMap [y, x] = 0.0f + (float)(pixelDistances [y, x]) * 0.02f;
 				} else { //city
 					finalHeightMap [y, x] = 0.0f;
 				}
 			}
 		}
+
 		setMin ();
+			
+		for (int y = 0; y < length-1; y++) {
+			for (int x = 0; x < width-1; x++) {
+				finalHeightMap [y, x] = finalHeightMap [y, x] + Math.Abs(addNoise(y, x, persistence)*0.2f);
+			}
+		}
+	}
+
+	private float addNoise (int y, int x, float[] persistence){
+	return samples5[y, x]*persistence[5] +
+		samples6[y, x]*persistence[6] + 
+		samples7[y, x]*persistence[7] +
+		samples8[y, x]*persistence[8]+
+		samples9[y, x]*persistence[9];
 	}
 	
 	private void setMin ()
@@ -323,16 +399,17 @@ public class GenCartoonTest4 : MonoBehaviour
 		for (int y = 0; y < length-1; y++) {
 			for (int x = 0; x < width-1; x++) {
 				if (colorMap [y, x] == (int)ground.Water) {
-					finalHeightMap [y, x] = waterSpace - ((finalHeightMap [y, x] + waterMin) / (waterMax + waterMin))*waterSpace;
+					finalHeightMap [y, x] = waterSpace - ((Math.Abs(finalHeightMap [y, x]) - waterMin) / (waterMax - waterMin))*waterSpace;
 				}
 				else if (colorMap [y, x] == (int)ground.Mountain) {
-					finalHeightMap [y, x] = waterSpace + fieldSpace + ((finalHeightMap [y, x] + mountainMin) / (mountainMax + mountainMin))*mountainSpace;
+					finalHeightMap [y, x] = waterSpace + fieldSpace + ((Math.Abs(finalHeightMap [y, x]) - mountainMin) / (mountainMax - mountainMin))*mountainSpace;
 				}
 				else{
-					finalHeightMap [y, x] = waterSpace + ((finalHeightMap [y, x] + fieldMin) / (fieldMax + fieldMin))*fieldSpace;
+							finalHeightMap [y, x] = waterSpace + ((Math.Abs(finalHeightMap [y, x]) - fieldMin) / (fieldMax - fieldMin))*fieldSpace;
 				}
 			}
 		}
+
 		finalHeightMap = averagePixels (finalHeightMap);
 	}
 	
@@ -341,21 +418,97 @@ public class GenCartoonTest4 : MonoBehaviour
 		for (int y = 1; y < length-2; y++) {
 			
 			for (int x = 1; x < width-2; x++) {
-				newFinalHeightMap [y, x] = finalHeightMap [y, x]/2 +
+				if (pixelDistances [y, x] > 1)
+					newFinalHeightMap [y, x] = finalHeightMap [y, x] / 2 +
 					(
-						finalHeightMap [y-1, x]+
-						finalHeightMap [y+1, x]+
-						finalHeightMap [y-1, x-1]+
-						finalHeightMap [y, x-1]+
-						finalHeightMap [y+1, x-1]+
-						finalHeightMap [y-1, x+1]+
-						finalHeightMap [y, x+1]+
-						finalHeightMap [y+1, x+1]
-						)/16f;
+					    finalHeightMap [y - 1, x] +
+					    finalHeightMap [y + 1, x] +
+					    finalHeightMap [y - 1, x - 1] +
+					    finalHeightMap [y, x - 1] +
+					    finalHeightMap [y + 1, x - 1] +
+					    finalHeightMap [y - 1, x + 1] +
+					    finalHeightMap [y, x + 1] +
+					    finalHeightMap [y + 1, x + 1]
+					) / 16f;
+				else
+					newFinalHeightMap [y, x] = finalHeightMap [y, x];
 			}
 		}
 		return newFinalHeightMap;
 	}
+
+
+
+	private float[, ] smartestInterpolation(float[, ] oldMat, int expand){
+		int newXY = expand*oldMat.GetLength(0)-expand+1;
+		float[, ] newMat = new float[newXY, newXY];
+		int multiplier = (int) ((newXY-1)/(oldMat.GetLength(0)-1));
+		int x1;
+		int y1;
+		int x2;
+		int y2;
+		float Q1;
+		float Q2;
+		float Q3;
+		float Q4;
+
+		for(int y=0; y< newMat.GetLength(0)-1; y++){
+
+			for(int x = 0; x < newMat.GetLength(0)-1; x++){
+				if(y%multiplier==0 && x%multiplier==0){
+					newMat[y, x] = oldMat[y/multiplier, x/multiplier];
+				}
+				else{
+					x1 = x/multiplier*multiplier;
+					x2 = x1+multiplier;
+					y1 = y/multiplier*multiplier;
+					y2 = y1+multiplier;
+					Q1 = oldMat[y/multiplier, x/multiplier];
+					Q2 = oldMat[y/multiplier, x/multiplier+1];
+					Q3 = oldMat[y/multiplier+1, x/multiplier];
+					Q4 = oldMat[y/multiplier+1, x/multiplier+1];
+
+					newMat[y, x] = fixedCalc((float)(x-x1)/(x2-x1), (float)(y-y1)/(y2-y1), Q1, Q2, Q3, Q4);
+				}
+			}
+		}
+		int newY = newMat.GetLength(0)-1;
+		for(int x = 0; x < newMat.GetLength(0)-1; x++){
+			if(x%multiplier==0){
+				newMat[newY, x] = oldMat[newY/multiplier, x/multiplier];
+			}
+			else{
+				x1 = x/multiplier*multiplier;
+				x2 = x1+multiplier;
+				newMat[newY, x] = interpolate(oldMat[newY/multiplier, x1/multiplier], oldMat[newY/multiplier, x2/multiplier], (float)(x-x1)/(x2-x1));
+			}
+		}
+
+		int newX = newMat.GetLength(0)-1;
+		for(int y = 0; y < newMat.GetLength(0); y++){
+			if(y%multiplier==0){
+				newMat[y, newX] = oldMat[y/multiplier, newX/multiplier];
+			}
+			else{
+				y1 = y/multiplier*multiplier;
+				y2 = y1+multiplier;
+				newMat[y, newX] = interpolate(oldMat[y1/multiplier, newX/multiplier], oldMat[y2/multiplier, newX/multiplier], (float)(y-y1)/(y2-y1));
+			}
+		}
+
+		return newMat;
+	}
+
+
+	//Q1 = top left Number
+	//Q2 = top right number
+	//Q3 = bottom left number
+	//Q4 = bottom right number
+	//fractionX and fractionY are the fraction/percentage of how far from top left to bottom right they are for each coordinate 
+	private float fixedCalc(float fractionX, float fractionY, float Q1, float Q2, float Q3, float Q4){
+		return (1 - fractionX) * ((1 - fractionY) * Q1 + fractionY * Q3) + fractionX * ((1 - fractionY) * Q2 + fractionY * Q4);
+	}
+
 
 	private void createTextures ()
 	{
@@ -417,5 +570,9 @@ public class GenCartoonTest4 : MonoBehaviour
 		float f = (float)(1 - Math.Cos (ft)) * 0.5f;
 		
 		return  (float)(a * (1 - f) + b * f);
+	}
+		
+	private float interpolate(float a, float b, float x){
+		return a*(1f-x) + b*x;
 	}
 }

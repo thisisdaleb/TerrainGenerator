@@ -1,10 +1,10 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System;
 using System.Collections.Generic;
 
 [ExecuteInEditMode]
-public class GenCartoonTest4 : MonoBehaviour
+public class GenCartoonRand : MonoBehaviour
 {
 	public bool runNow;
 	private int[,] initColorMap;
@@ -334,6 +334,8 @@ public class GenCartoonTest4 : MonoBehaviour
 			}
 		}
 		finalHeightMap = averagePixels (finalHeightMap);
+
+		addNoise ();
 	}
 	
 	private float[, ] averagePixels (float[, ] finalHeightMap){
@@ -355,6 +357,21 @@ public class GenCartoonTest4 : MonoBehaviour
 			}
 		}
 		return newFinalHeightMap;
+	}
+
+	private void addNoise ()
+	{
+		System.Random rand = new System.Random ();
+		for (int y = 1; y < length - 2; y++) {
+
+			for (int x = 1; x < width - 2; x++) {
+				if(colorMap[y, x] == (int) ground.Mountain && pixelDistances[y, x] > 1)
+					finalHeightMap [y, x] += (float) (rand.NextDouble()*0.002f);
+				else
+					finalHeightMap [y, x] += (float) (rand.NextDouble()*0.0003f);
+			}
+		
+		}
 	}
 
 	private void createTextures ()

@@ -4,7 +4,7 @@ using System.Linq; // used for Sum of array
 
 public class SplatMapCreator {
 	
-	public void startTerrainPlacing(TerrainData terrainData){
+	public void startTerrainPlacing(TerrainData terrainData, bool fourthTexture){
 
 		// Splatmap data is stored internally as a 3d array of floats, so declare a new empty array ready for your custom splatmap data:
 		float[, ,] splatmapData = new float[terrainData.alphamapWidth, terrainData.alphamapHeight, terrainData.alphamapLayers];
@@ -41,15 +41,30 @@ public class SplatMapCreator {
 				//splatWeights[1] = Mathf.Clamp01((terrainData.heightmapHeight - height));
 				
 				//Field
-				if(steepness>25f){
+
+				if (fourthTexture) {
+					if (height < terrainDataSize.y * 0.12f){
+						splatWeights [0] = 0f;
+						splatWeights [1] = 1f;
+						splatWeights [1] = 0f;
+						splatWeights [3] = 0f;
+					}
+					else if (height <= terrainDataSize.y * 0.16f) {
+						splatWeights [0] = 0f;
+						splatWeights [1] = 0f;
+						splatWeights [1] = 0f;
+						splatWeights [3] = 1f;
+					}
+				}
+				if(steepness>28f){
 					splatWeights[0] = 0f;
 					splatWeights[1] = 1f;
 					splatWeights[2] = 0f;
 				}
 				else if(height > terrainDataSize.y*0.16f && height < terrainDataSize.y*0.2f){
-					splatWeights[0] = 1f;
-					splatWeights [1] = 0f; 
-					splatWeights[2] = 0f;
+						splatWeights [0] = 1f;
+						splatWeights [1] = 0f;
+						splatWeights [2] = 0f;
 				}
 				//Mountain
 				else{
