@@ -23,7 +23,8 @@ public class GenCartoonRand : MonoBehaviour
 	public int waterHeight = 400;
 	public int fieldHeight = 100;
 	public int mountainHeight = 2000;
-
+	float waterSpace;
+	float fieldSpace;
 	//important note:
 	//boundary of map defined by:
 	//!((k+y) < 0 || (k + y) > (length-1) || (z + x) < 0 || (z + x) > (width-1))
@@ -54,7 +55,7 @@ public class GenCartoonRand : MonoBehaviour
 
 		fieldEdgeTypes = new Boolean[width, length];
 
-		tex = Resources.Load ("InputPictureG") as Texture2D;
+		//tex = Resources.Load ("InputPictureG") as Texture2D;
 
 		textureList = new Texture2D[3];
 
@@ -73,7 +74,7 @@ public class GenCartoonRand : MonoBehaviour
 	// Update is called once per frame
 	void Update ()
 	{
-		if (runNow) {
+		if (runNow && !(tex == null)) {
 			convertInputIntoMap ();
 		}
 		else {
@@ -312,9 +313,9 @@ public class GenCartoonRand : MonoBehaviour
 		
 		terrainHeight = waterHeight + mountainHeight + fieldHeight;
 
-		float waterSpace = (float)(waterHeight) / (float)(terrainHeight);
+		waterSpace = (float)(waterHeight) / (float)(terrainHeight);
+		fieldSpace = (float)(fieldHeight) / (float)(terrainHeight);
 		float mountainSpace = (float)(mountainHeight) / (float)(terrainHeight);
-		float fieldSpace = (float)(fieldHeight) / (float)(terrainHeight);
 
 		print ("bottom: " + waterSpace + " top: " + (fieldSpace+waterSpace));
 		print ("Min: " + mountainMin + " Max: " + (mountainMax));
@@ -396,9 +397,9 @@ public class GenCartoonRand : MonoBehaviour
 	{
 		SplatMapCreator spatMapper = new SplatMapCreator ();
 		if(terrainTexs.Length>3)
-			spatMapper.startTerrainPlacing (terrainData, true);
+			spatMapper.startTerrainPlacing (terrainData, true, waterSpace, (waterSpace + fieldSpace));
 		else
-			spatMapper.startTerrainPlacing (terrainData, false);
+			spatMapper.startTerrainPlacing (terrainData, false, waterSpace, (waterSpace + fieldSpace));
 		//GameObject go = (GameObject)Instantiate(Resources.Load("WATERTIME"));
 		//go.transform.position = (new Vector3 (4000f, (float) waterHeight - 3f, 4000f));
 		//go.transform.localScale = new Vector3 (5000f, 0.001f, 5000f);

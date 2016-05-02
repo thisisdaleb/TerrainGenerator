@@ -31,6 +31,8 @@ public class GenCartoonNoiseTest : MonoBehaviour
 	private float[, ] samples7;
 	private float[, ] samples8;
 	private float[, ] samples9;
+	private float waterSpace;
+	private float fieldSpace;
 
 	//important note:
 	//boundary of map defined by:
@@ -388,9 +390,9 @@ public class GenCartoonNoiseTest : MonoBehaviour
 		
 		terrainHeight = waterHeight + mountainHeight + fieldHeight;
 
-		float waterSpace = (float)(waterHeight) / (float)(terrainHeight);
+		waterSpace = (float)(waterHeight) / (float)(terrainHeight);
 		float mountainSpace = (float)(mountainHeight) / (float)(terrainHeight);
-		float fieldSpace = (float)(fieldHeight) / (float)(terrainHeight);
+		fieldSpace = (float)(fieldHeight) / (float)(terrainHeight);
 
 		print ("bottom: " + waterSpace + " top: " + (fieldSpace+waterSpace));
 		print ("Min: " + mountainMin + " Max: " + (mountainMax));
@@ -532,9 +534,9 @@ public class GenCartoonNoiseTest : MonoBehaviour
 	{
 		SplatMapCreator spatMapper = new SplatMapCreator ();
 		if(terrainTexs.Length>3)
-			spatMapper.startTerrainPlacing (terrainData, true);
+			spatMapper.startTerrainPlacing (terrainData, true, waterSpace, (waterSpace+fieldSpace));
 		else
-			spatMapper.startTerrainPlacing (terrainData, false);
+			spatMapper.startTerrainPlacing (terrainData, false, waterSpace, (waterSpace+fieldSpace));
 		//GameObject go = (GameObject)Instantiate(Resources.Load("WATERTIME"));
 		//go.transform.position = (new Vector3 (4000f, (float) waterHeight - 3f, 4000f));
 		//go.transform.localScale = new Vector3 (5000f, 0.001f, 5000f);

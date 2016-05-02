@@ -4,11 +4,10 @@ using System.Linq; // used for Sum of array
 
 public class SplatMapCreator {
 	
-	public void startTerrainPlacing(TerrainData terrainData, bool fourthTexture){
+	public void startTerrainPlacing(TerrainData terrainData, bool fourthTexture, float waterTop, float fieldTop){
 
 		// Splatmap data is stored internally as a 3d array of floats, so declare a new empty array ready for your custom splatmap data:
 		float[, ,] splatmapData = new float[terrainData.alphamapWidth, terrainData.alphamapHeight, terrainData.alphamapLayers];
-		
 		
 		Vector3 terrainDataSize = terrainData.size;
 		
@@ -21,7 +20,7 @@ public class SplatMapCreator {
 				float x_01 = (float)x/(float)terrainData.alphamapWidth;
 				
 				// Sample the height at this location (note GetHeight expects int coordinates corresponding to locations in the heightmap array)
-				float height = terrainData.GetHeight(Mathf.RoundToInt(y_01 * terrainData.heightmapHeight),Mathf.RoundToInt(x_01 * terrainData.heightmapWidth) );
+				float height = terrainData.GetHeight(Mathf.RoundToInt(y_01 * terrainData.heightmapHeight),Mathf.RoundToInt(x_01 * terrainData.heightmapWidth) ) / terrainDataSize.y;
 				
 				// Calculate the normal of the terrain (note this is in normalised coordinates relative to the overall terrain dimensions)
 				//Vector3 normal = terrainData.GetInterpolatedNormal(y_01,x_01);
@@ -43,13 +42,13 @@ public class SplatMapCreator {
 				//Field
 
 				if (fourthTexture) {
-					if (height < terrainDataSize.y * 0.12f){
+					if (height < waterTop/2*3){
 						splatWeights [0] = 0f;
 						splatWeights [1] = 1f;
 						splatWeights [1] = 0f;
 						splatWeights [3] = 0f;
 					}
-					else if (height <= terrainDataSize.y * 0.16f) {
+					else if (height <= waterTop) {
 						splatWeights [0] = 0f;
 						splatWeights [1] = 0f;
 						splatWeights [1] = 0f;
@@ -61,7 +60,7 @@ public class SplatMapCreator {
 					splatWeights[1] = 1f;
 					splatWeights[2] = 0f;
 				}
-				else if(height > terrainDataSize.y*0.16f && height < terrainDataSize.y*0.2f){
+				else if(height > waterTop && height < fieldTop){
 						splatWeights [0] = 1f;
 						splatWeights [1] = 0f;
 						splatWeights [2] = 0f;
@@ -73,7 +72,7 @@ public class SplatMapCreator {
 					splatWeights[2] = 0f;
 				}
 				//snow
-				if(height > terrainDataSize.y*0.6){
+				if(height > 0.6f){
 					splatWeights[0] = 0f;
 					splatWeights [1] = 0f; 
 					splatWeights[2] = 1f;

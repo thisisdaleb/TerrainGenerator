@@ -1,10 +1,10 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System;
 using System.Collections.Generic;
 
 [ExecuteInEditMode]
-public class GenCartoonTest4 : MonoBehaviour
+public class GenCartoonRandWithClasses : MonoBehaviour
 {
 	public bool runNow;
 	private int[,] initColorMap;
@@ -23,8 +23,8 @@ public class GenCartoonTest4 : MonoBehaviour
 	public int waterHeight = 400;
 	public int fieldHeight = 100;
 	public int mountainHeight = 2000;
-	float waterSpace;
-	float fieldSpace;
+	private float waterSpace;
+	private float fieldSpace;
 
 	//important note:
 	//boundary of map defined by:
@@ -56,7 +56,7 @@ public class GenCartoonTest4 : MonoBehaviour
 
 		fieldEdgeTypes = new Boolean[width, length];
 
-		tex = Resources.Load ("InputPictureG") as Texture2D;
+		//tex = Resources.Load ("InputPictureG") as Texture2D;
 
 		textureList = new Texture2D[3];
 
@@ -75,7 +75,7 @@ public class GenCartoonTest4 : MonoBehaviour
 	// Update is called once per frame
 	void Update ()
 	{
-		if (runNow) {
+		if (runNow && !(tex == null)) {
 			convertInputIntoMap ();
 		}
 		else {
@@ -87,9 +87,8 @@ public class GenCartoonTest4 : MonoBehaviour
 	{
 		print ("Start running processor melting program.");
 		
-		setColors ();
-		
-		setDistances ();
+		ImageDistances setImage = new ImageDistances ();
+		setImage.setColors (tex, width, length, pixelDistances, colorMap, fieldEdgeTypes);
 		
 		//create matrix of floats, set to the integer matrix where the minimum
 		//integer value is normalized to 0.0f and the maximum value is at 1.0f
@@ -100,137 +99,6 @@ public class GenCartoonTest4 : MonoBehaviour
 		
 		runNow = false;
 		refreshVariables ();
-	}
-
-	void setColors ()
-	{
-		//GetPixel is not efficient. This method could run 100X faster if I replace that with GetPixels or GetPixels32 or whatever I need.
-		
-		int imageLoopX = tex.width;
-		int imageLoopY = tex.height;
-		
-		int loopX = 0;
-		int loopY = 0;
-		
-		int xPlaced = width / imageLoopX;
-		int yPlaced = length / imageLoopY;
-		
-		int placeX = 0;
-		int placeY = 0;
-		
-		print ("Values:  " + imageLoopX + "  " + imageLoopY + "  " + loopX + "  " + loopY + "  ");
-		print ("Values:  " + xPlaced + "  " + yPlaced + "  " + placeX + "  " + placeY + "  ");
-		
-		while (loopY < imageLoopY) {
-			while (loopX < imageLoopX) {
-				while (placeY < yPlaced) {
-					while (placeX < xPlaced) {
-						if ((yPlaced * loopY) + placeY < length && (xPlaced * loopX) + placeX < width) {
-							
-							if (tex.GetPixel (loopX, loopY).g > 0.5) { //field
-								colorMap [(yPlaced * loopY) + placeY, (xPlaced * loopX) + placeX] = (int)ground.Field;
-								
-							} else if (tex.GetPixel (loopX, loopY).r > 0.7) { //mountains
-								colorMap [(yPlaced * loopY) + placeY, (xPlaced * loopX) + placeX] = (int)ground.Mountain;
-							} else if (tex.GetPixel (loopX, loopY).b > 0.7) { //water 
-								colorMap [(yPlaced * loopY) + placeY, (xPlaced * loopX) + placeX] = (int)ground.Water;
-								
-							} else { //city
-								colorMap [(yPlaced * loopY) + placeY, (xPlaced * loopX) + placeX] = (int)ground.Field;
-							}
-						}
-						placeX++;
-					}
-					placeX = 0;
-					placeY++;
-				}
-				placeY = 0;
-				loopX++;
-			}
-			loopX = 0;
-			loopY++;
-		}
-	}
-	
-	private void setDistances ()
-	{
-		for (int y = 0; y < pixelDistances.GetLength(0); y++) {
-			for (int x = 0; x < pixelDistances.GetLength(1); x++) {
-				pixelTypeDistance (y, x, 0, -1, (int)ground.Mountain, true);
-				pixelTypeDistance (y, x, 0, -1, (int)ground.Water, true);
-				fieldDistance (y, x, 0, -1, true);
-			}
-		}
-		
-		for (int  y = 0; y < pixelDistances.GetLength(0); y++) {
-			for (int x = pixelDistances.GetLength(1)-1; x >= 0; x--) {
-				pixelTypeDistance (y, x, 0, 1, (int)ground.Mountain, false);
-				pixelTypeDistance (y, x, 0, 1, (int)ground.Water, false);
-				fieldDistance (y, x, 0, 1, false);
-			}
-		}
-		
-		for (int x = 0; x < pixelDistances.GetLength(1); x++) {
-			for (int y = 0; y < pixelDistances.GetLength(0); y++) {
-				pixelTypeDistance (y, x, -1, 0, (int)ground.Mountain, false);
-				pixelTypeDistance (y, x, -1, 0, (int)ground.Water, false);
-				fieldDistance (y, x, -1, 0, false);
-			}
-		}
-		
-		for (int x = 0; x < pixelDistances.GetLength(1); x++) {
-			for (int y = pixelDistances.GetLength(0)-1; y >= 0; y--) {
-				pixelTypeDistance (y, x, 1, 0, (int)ground.Mountain, false);
-				pixelTypeDistance (y, x, 1, 0, (int)ground.Water, false);
-				fieldDistance (y, x, 1, 0, false);
-			}
-		}
-
-		for (int y = 0; y < pixelDistances.GetLength(0); y++) {
-			for (int x = 0; x < pixelDistances.GetLength(1); x++) {
-				pixelTypeDistance (y, x, 0, -1, (int)ground.Mountain, false);
-				pixelTypeDistance (y, x, 0, -1, (int)ground.Water, false);
-				fieldDistance (y, x, 0, -1, false);
-			}
-		}
-
-	}
-	
-	private void pixelTypeDistance (int y, int x, int movingY, int movingX, int groundType, Boolean firstRun)
-	{
-		if (colorMap [y, x] == groundType) {
-			if (y == 0 || x == 0 || y == pixelDistances.GetLength (0) - 1 || x == pixelDistances.GetLength (1) - 1) {
-				pixelDistances [y, x] = 10;
-			} else if (colorMap [y + movingY, x + movingX] == groundType) {
-				if (firstRun || pixelDistances [y, x] > pixelDistances [y + movingY, x + movingX])
-					pixelDistances [y, x] = pixelDistances [y + movingY, x + movingX] + 1;
-			} else {
-				pixelDistances [y, x] = 1;
-			}
-		}
-	}
-
-	private void fieldDistance (int y, int x, int movingY, int movingX, Boolean firstRun)
-	{
-		if (colorMap [y, x] == (int)ground.Field) {
-			if (y == 0 || x == 0 || y == pixelDistances.GetLength (0) - 1 || x == pixelDistances.GetLength (1) - 1) {
-				pixelDistances [y, x] = 1;
-				fieldEdgeTypes [y, x] = true; 
-				//true = Mountain Edge
-				//false = Water Edge
-			} else if (colorMap [y + movingY, x + movingX] == (int)ground.Field) {
-				if (firstRun || pixelDistances [y, x] > pixelDistances [y + movingY, x + movingX]) {
-					pixelDistances [y, x] = pixelDistances [y + movingY, x + movingX] + 1;
-					fieldEdgeTypes [y, x] = fieldEdgeTypes [y + movingY, x + movingX]; 
-				}
-			} else {
-				pixelDistances [y, x] = 1;
-				if (colorMap [y + movingY, x + movingX] == (int)ground.Mountain)
-					fieldEdgeTypes [y, x] = true;
-				else if (colorMap [y + movingY, x + movingX] == (int)ground.Water)
-					fieldEdgeTypes [y, x] = false;
-			}
-		}
 	}
 	
 	private void createFloatMatrix ()
@@ -335,7 +203,10 @@ public class GenCartoonTest4 : MonoBehaviour
 				}
 			}
 		}
+
 		finalHeightMap = averagePixels (finalHeightMap);
+
+		addNoise ();
 	}
 	
 	private float[, ] averagePixels (float[, ] finalHeightMap){
@@ -357,6 +228,21 @@ public class GenCartoonTest4 : MonoBehaviour
 			}
 		}
 		return newFinalHeightMap;
+	}
+
+	private void addNoise ()
+	{
+		System.Random rand = new System.Random ();
+		for (int y = 1; y < length - 2; y++) {
+
+			for (int x = 1; x < width - 2; x++) {
+				if(colorMap[y, x] == (int) ground.Mountain && pixelDistances[y, x] > 1)
+					finalHeightMap [y, x] += (float) (rand.NextDouble()*0.002f);
+				else
+					finalHeightMap [y, x] += (float) (rand.NextDouble()*0.0003f);
+			}
+		
+		}
 	}
 
 	private void createTextures ()
