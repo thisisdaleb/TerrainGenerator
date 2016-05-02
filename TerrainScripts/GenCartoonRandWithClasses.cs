@@ -234,7 +234,7 @@ public class GenCartoonRandWithClasses : MonoBehaviour
 			for (int x = 1; x < width - 2; x++) {
 				if(colorMap[y, x] == (int) ground.Mountain && pixelDistances[y, x] > 1)
 					finalHeightMap [y, x] += (float) (rand.NextDouble()*0.002f);
-				else
+				else if (colorMap[y, x] == (int) ground.Field && (fieldEdgeTypes[y, x] || pixelDistances[y, x] > 2))
 					finalHeightMap [y, x] += (float) (rand.NextDouble()*0.0003f);
 			}
 		
@@ -243,19 +243,10 @@ public class GenCartoonRandWithClasses : MonoBehaviour
 
 	private void createTextures ()
 	{
-		terrainTexs [0] = new SplatPrototype ();
-		terrainTexs [0].texture = textureList [0];
-		terrainTexs [0].tileSize = new Vector2 (15, 15);
-		terrainTexs [1] = new SplatPrototype ();
-		terrainTexs [1].texture = textureList [1];
-		terrainTexs [1].tileSize = new Vector2 (15, 15);
-		terrainTexs [2] = new SplatPrototype ();
-		terrainTexs [2].texture = textureList [2];
-		terrainTexs [2].tileSize = new Vector2 (15, 15);
-		if (textureList.Length > 3) {
-			terrainTexs [3] = new SplatPrototype ();
-			terrainTexs [3].texture = textureList [3];
-			terrainTexs [3].tileSize = new Vector2 (15, 15);
+		for (int k = 0; k < textureList.Length; k++) {
+			terrainTexs [k] = new SplatPrototype ();
+			terrainTexs [k].texture = textureList [k];
+			terrainTexs [k].tileSize = new Vector2 (10, 10);
 		}
 	}
 
