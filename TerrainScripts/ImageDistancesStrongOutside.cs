@@ -9,8 +9,7 @@ public class ImageDistancesStrongOutside
 		Field,
 		Mountain,
 		Water,
-		City 
-	}
+		City}
 	;
 
 	public void setColors (Texture2D tex, int width, int length, float[,] pixelDistances, int[,] colorMap, bool[,] fieldEdgeTypes)
@@ -96,15 +95,17 @@ public class ImageDistancesStrongOutside
 			}
 		}
 
+		setTrueEdges (pixelDistances, colorMap);
+
 	}
 
 	private void pixelTypeDistance (int y, int x, int movingY, int movingX, int groundType, bool firstRun, 
-		float[,] pixelDistances, int[,] colorMap)
+	                                float[,] pixelDistances, int[,] colorMap)
 	{
 		if (colorMap [y, x] == groundType) {
-			if (edgeCases (y, x, movingY, movingX, (int)ground.Mountain, false, pixelDistances, colorMap)) {
-			}
-			else if (colorMap [y + movingY, x + movingX] == groundType) {
+			if (y < 2 || x < 2 || y > pixelDistances.GetLength (0) - 3 || x > pixelDistances.GetLength (1) - 3) {
+				pixelDistances [y, x] = 1000;
+			} else if (colorMap [y + movingY, x + movingX] == groundType) {
 				if (firstRun || pixelDistances [y, x] > pixelDistances [y + movingY, x + movingX])
 					pixelDistances [y, x] = pixelDistances [y + movingY, x + movingX] + 1;
 			} else {
@@ -113,43 +114,30 @@ public class ImageDistancesStrongOutside
 		}
 	}
 
-	private bool edgeCases (int y, int x, int movingY, int movingX, int groundType, bool firstRun, 
-		float[,] pixelDistances, int[,] colorMap) {
-		if (y < 2) {
-			if (movingY == -1) {
-				pixelDistances [y, x] = 100;
-			}
-			if (movingY == 1) {
-				pixelDistances [y, x] = pixelDistances [y + movingY, x] - 1;
-			}
-			return true;
-		} 
-		else if (y >= pixelDistances.GetLength (0) - 2) {
-			if (movingY == -1) {
-				pixelDistances [y, x] = pixelDistances [y + movingY, x] - 1;
-			}
-			return true;
+	private void setTrueEdges (float[,] pixelDistances, int[,] colorMap)
+	{
+		for (int k = 1; k < pixelDistances.GetLength (0) - 2; k++) {
+			//left side
+			pixelDistances [k, 2] = pixelDistances [k, 3] - 1;
+			pixelDistances [k, 1] = pixelDistances [k, 2] - 1;
+			pixelDistances [k, 0] = pixelDistances [k, 1] - 1;
+			//top side
+			pixelDistances [2, k] = pixelDistances [3, k] - 1;
+			pixelDistances [1, k] = pixelDistances [2, k] - 1;
+			pixelDistances [0, k] = pixelDistances [1, k] - 1;
+			//bottom side
+			pixelDistances [pixelDistances.GetLength (0) - 3, k] = pixelDistances [pixelDistances.GetLength (0) - 4, k] - 1;
+			pixelDistances [pixelDistances.GetLength (0) - 2, k] = pixelDistances [pixelDistances.GetLength (0) - 3, k] - 1;
+			pixelDistances [pixelDistances.GetLength (0) - 1, k] = pixelDistances [pixelDistances.GetLength (0) - 2, k] - 1;
+			//right side
+			pixelDistances [k, pixelDistances.GetLength (0) - 3] = pixelDistances [k, pixelDistances.GetLength (0) - 4] - 1;
+			pixelDistances [k, pixelDistances.GetLength (0) - 2] = pixelDistances [k, pixelDistances.GetLength (0) - 3] - 1;
+			pixelDistances [k, pixelDistances.GetLength (0) - 1] = pixelDistances [k, pixelDistances.GetLength (0) - 2] - 1;
 		}
-		if (x < 2) {
-			if (movingX == -1) {
-				pixelDistances [y, x] = 100;
-			}
-			if (movingX == 1) {
-				pixelDistances [y, x] = pixelDistances [y, x + movingX] - 1;
-			}
-			return true;
-		}
-		else if (x >= pixelDistances.GetLength (1) - 2) {
-			if (movingX == -1) {
-				pixelDistances [y, x] = pixelDistances [y, x + movingX] - 1;
-			}
-			return true;
-		}
-		return false;
 	}
 
 	private void fieldDistance (int y, int x, int movingY, int movingX, bool firstRun, 
-		float[,] pixelDistances, int[,] colorMap, bool[,] fieldEdgeTypes)
+	                            float[,] pixelDistances, int[,] colorMap, bool[,] fieldEdgeTypes)
 	{
 		if (colorMap [y, x] == (int)ground.Field) {
 			if (y == 0 || x == 0 || y == pixelDistances.GetLength (0) - 1 || x == pixelDistances.GetLength (1) - 1) {

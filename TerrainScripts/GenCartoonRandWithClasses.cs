@@ -89,6 +89,11 @@ public class GenCartoonRandWithClasses : MonoBehaviour
 		
 		ImageDistancesStrongOutside setImage = new ImageDistancesStrongOutside ();
 		setImage.setColors (tex, width, length, pixelDistances, colorMap, fieldEdgeTypes);
+
+		pixelDistances [0, 0] = 0;
+		pixelDistances [pixelDistances.GetLength (0) - 1, 0] = 0;
+		pixelDistances [0, pixelDistances.GetLength (0) - 1] = 0;
+		pixelDistances [pixelDistances.GetLength (0) - 1, pixelDistances.GetLength (0) - 1] = 0;
 		
 		//create matrix of floats, set to the integer matrix where the minimum
 		//integer value is normalized to 0.0f and the maximum value is at 1.0f

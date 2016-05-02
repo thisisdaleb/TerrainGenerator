@@ -112,9 +112,6 @@ public class ImageDistances
 		if (colorMap [y, x] == groundType) {
 			if (y ==0 || x == 0 || y == pixelDistances.GetLength (0) - 1 || x == pixelDistances.GetLength (1) - 1) {
 				pixelDistances [y, x] = 10;
-
-				//consider using firstRun to define the exact height needed?
-
 			} else if (colorMap [y + movingY, x + movingX] == groundType) {
 				if (firstRun || pixelDistances [y, x] > pixelDistances [y + movingY, x + movingX])
 					pixelDistances [y, x] = pixelDistances [y + movingY, x + movingX] + 1;
