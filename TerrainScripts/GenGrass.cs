@@ -4,10 +4,9 @@ using System;
 using System.Collections.Generic;
 
 [ExecuteInEditMode]
-public class GenCartoonRandWithClasses : MonoBehaviour
+public class GenGrass : MonoBehaviour
 {
 	public bool runNow;
-	private int[,] initColorMap;
 	private int width = 2049; //These 2 defined by input! Each terrain 4097 pixels wide and long
 	private int length; //Input is amount of tiles in width and length (Ex: 2x3 tiles)
 	private float[,] finalHeightMap; //defines the elevation of each height point between 0.0 and 1.0
@@ -266,6 +265,25 @@ public class GenCartoonRandWithClasses : MonoBehaviour
 		//go.transform.position = (new Vector3 (4000f, (float) waterHeight - 3f, 4000f));
 		//go.transform.localScale = new Vector3 (5000f, 0.001f, 5000f);
 	}
+
+	private void createGrass (TerrainData terrainData)
+	{
+		Texture2D grassTex = Resources.Load ("Grass4") as Texture2D;
+
+		DetailPrototype[] details = new DetailPrototype[1];
+		details [0] = new DetailPrototype ();
+		details [0].renderMode = DetailRenderMode.GrassBillboard;
+		details [0].prototypeTexture = grassTex;
+		details [0].maxWidth = 4f;
+		details [0].minWidth = 3.5f;
+		terrainData.detailPrototypes = details;
+	}
+
+	private void placeGrass (TerrainData terrainData)
+	{
+		GrassCreator grassMap = new GrassCreator ();
+		grassMap.startGrassPlacing (terrainData, colorMap, 2048, 8, waterSpace, (waterSpace+fieldSpace));
+	}
 	
 	private void createTerrain ()
 	{
@@ -284,9 +302,15 @@ public class GenCartoonRandWithClasses : MonoBehaviour
 		terrainData.splatPrototypes = terrainTexs;
 		
 		placeTextures (terrainData);
+
+		createGrass (terrainData);
+
+		placeGrass (terrainData);
+
 		//terrainData.treePrototypes = m_treeProtoTypes;
-		//terrainData.detailPrototypes = m_detailProtoTypes;
 		GameObject go = Terrain.CreateTerrainGameObject (terrainData);
+		go.GetComponent<Terrain> ().detailObjectDistance = 200;
+		go.GetComponent<Terrain> ().detailObjectDensity = 1F;
 		go.transform.position.Set (0, 0, 0);
 		print ("It made it to the end");
 	}
