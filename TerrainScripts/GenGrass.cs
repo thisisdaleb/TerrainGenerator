@@ -291,7 +291,6 @@ public class GenGrass : MonoBehaviour
 		
 		terrainData.heightmapResolution = width;
 		terrainData.baseMapResolution = 2048;
-		terrainData.SetDetailResolution (2048, 16);
 		terrainData.alphamapResolution = 2048;
 		
 		terrainData.SetHeights (0, 0, finalHeightMap);
