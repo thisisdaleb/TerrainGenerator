@@ -35,12 +35,9 @@ public class ImageDistances
 					while (placeX < xPlaced) {
 						if ((yPlaced * loopY) + placeY < length && (xPlaced * loopX) + placeX < width) {
 
-							if (tex.GetPixel (loopX, loopY).g > 0.5) { //field
-								colorMap [(yPlaced * loopY) + placeY, (xPlaced * loopX) + placeX] = (int)ground.Field;
-
-							} else if (tex.GetPixel (loopX, loopY).r > 0.7) { //mountains
+							if (tex.GetPixel (loopX, loopY).r > 0.6) { //mountains
 								colorMap [(yPlaced * loopY) + placeY, (xPlaced * loopX) + placeX] = (int)ground.Mountain;
-							} else if (tex.GetPixel (loopX, loopY).b > 0.7) { //water 
+							} else if (tex.GetPixel (loopX, loopY).b > 0.6) { //water 
 								colorMap [(yPlaced * loopY) + placeY, (xPlaced * loopX) + placeX] = (int)ground.Water;
 
 							} else { //city

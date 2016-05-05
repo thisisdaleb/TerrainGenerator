@@ -2,11 +2,11 @@ using UnityEngine;
 using System.Collections;
 using System.Linq;
 
- // used for Sum of array
+// used for Sum of array
 
 public class TreeCreator
 {
-	
+
 	public void startTreePlacing (TerrainData terrainData, int[,] colorMap, int grassDensity, int patchDetail, float waterTop, float fieldTop)
 	{
 		terrainData.SetDetailResolution(grassDensity, patchDetail);
