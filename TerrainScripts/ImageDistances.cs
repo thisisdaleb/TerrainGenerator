@@ -35,13 +35,16 @@ public class ImageDistances
 					while (placeX < xPlaced) {
 						if ((yPlaced * loopY) + placeY < length && (xPlaced * loopX) + placeX < width) {
 
-							if (tex.GetPixel (loopX, loopY).r > 0.6) { //mountains
+							if (tex.GetPixel (loopX, loopY).r > 0.7) { //mountains
 								colorMap [(yPlaced * loopY) + placeY, (xPlaced * loopX) + placeX] = (int)ground.Mountain;
-							} else if (tex.GetPixel (loopX, loopY).b > 0.6) { //water 
+							} else if (tex.GetPixel (loopX, loopY).b > 0.5) { //water 
 								colorMap [(yPlaced * loopY) + placeY, (xPlaced * loopX) + placeX] = (int)ground.Water;
 
-							} else { //city
+							} else if(tex.GetPixel (loopX, loopY).g > 0.5){
 								colorMap [(yPlaced * loopY) + placeY, (xPlaced * loopX) + placeX] = (int)ground.Field;
+							}
+							else{
+								colorMap [(yPlaced * loopY) + placeY, (xPlaced * loopX) + placeX] = (int)ground.City;
 							}
 						}
 						placeX++;
@@ -56,7 +59,48 @@ public class ImageDistances
 			loopY++;
 		}
 
+		fixCityEdges (colorMap, fieldEdgeTypes);
 		setDistances (pixelDistances, colorMap, fieldEdgeTypes);
+	}
+
+	private void fixCityEdges (int[,] colorMap, bool[,] fieldEdgeTypes)
+	{
+		int[, ] newColors = new int[ colorMap.GetLength(0),  colorMap.GetLength (1)];
+		for (int y = 1; y < colorMap.GetLength (0)-1; y++) {
+			for (int x = 1; x < colorMap.GetLength (1)-1; x++) {
+				if (colorMap [y, x] == (int)ground.City) {
+					if (colorMap [y, x - 1] != (int)ground.City) {
+						newColors [y, x] = colorMap [y, x - 1];
+					} else if (colorMap [y, x + 1] != (int)ground.City) {
+						newColors [y, x] = colorMap [y, x + 1];
+					} else if (colorMap [y - 1, x] != (int)ground.City) {
+						newColors [y, x] = colorMap [y - 1, x];
+					} else if (colorMap [y + 1, x] != (int)ground.City) {
+						newColors [y, x] = colorMap [y + 1, x];
+					}
+					else if (colorMap [y, x - 2] != (int)ground.City) {
+						newColors [y, x] = colorMap [y, x - 2];
+					} else if (colorMap [y, x + 2] != (int)ground.City) {
+						newColors [y, x] = colorMap [y, x + 2];
+					} else if (colorMap [y - 2, x] != (int)ground.City) {
+						newColors [y, x] = colorMap [y - 2, x];
+					} else if (colorMap [y + 2, x] != (int)ground.City) {
+						newColors [y, x] = colorMap [y + 2, x];
+					}
+					else if (colorMap [y, x - 3] != (int)ground.City) {
+						newColors [y, x] = colorMap [y, x - 3];
+					} else if (colorMap [y, x + 3] != (int)ground.City) {
+						newColors [y, x] = colorMap [y, x + 3];
+					} else if (colorMap [y - 3, x] != (int)ground.City) {
+						newColors [y, x] = colorMap [y - 3, x];
+					} else if (colorMap [y + 3, x] != (int)ground.City) {
+						newColors [y, x] = colorMap [y + 3, x];
+					}
+				} 
+				else newColors [y, x] = colorMap [y, x];
+			}
+		}
+		colorMap = newColors;
 	}
 
 	private void setDistances (float[,] pixelDistances, int[,] colorMap, bool[,] fieldEdgeTypes)
@@ -65,6 +109,7 @@ public class ImageDistances
 			for (int x = 0; x < pixelDistances.GetLength (1); x++) {
 				pixelTypeDistance (y, x, 0, -1, (int)ground.Mountain, true, pixelDistances, colorMap, fieldEdgeTypes);
 				pixelTypeDistance (y, x, 0, -1, (int)ground.Water, true, pixelDistances, colorMap, fieldEdgeTypes);
+				pixelTypeDistance (y, x, 0, -1, (int)ground.City, true, pixelDistances, colorMap, fieldEdgeTypes);
 				fieldDistance (y, x, 0, -1, true, pixelDistances, colorMap, fieldEdgeTypes);
 			}
 		}
@@ -73,6 +118,7 @@ public class ImageDistances
 			for (int x = pixelDistances.GetLength (1) - 1; x >= 0; x--) {
 				pixelTypeDistance (y, x, 0, 1, (int)ground.Mountain, false, pixelDistances, colorMap, fieldEdgeTypes);
 				pixelTypeDistance (y, x, 0, 1, (int)ground.Water, false, pixelDistances, colorMap, fieldEdgeTypes);
+				pixelTypeDistance (y, x, 0, 1, (int)ground.City, false, pixelDistances, colorMap, fieldEdgeTypes);
 				fieldDistance (y, x, 0, 1, false, pixelDistances, colorMap, fieldEdgeTypes);
 			}
 		}
@@ -81,6 +127,7 @@ public class ImageDistances
 			for (int y = 0; y < pixelDistances.GetLength (0); y++) {
 				pixelTypeDistance (y, x, -1, 0, (int)ground.Mountain, false, pixelDistances, colorMap, fieldEdgeTypes);
 				pixelTypeDistance (y, x, -1, 0, (int)ground.Water, false, pixelDistances, colorMap, fieldEdgeTypes);
+				pixelTypeDistance (y, x, -1, 0, (int)ground.City, false, pixelDistances, colorMap, fieldEdgeTypes);
 				fieldDistance (y, x, -1, 0, false, pixelDistances, colorMap, fieldEdgeTypes);
 			}
 		}
@@ -89,6 +136,7 @@ public class ImageDistances
 			for (int y = pixelDistances.GetLength (0) - 1; y >= 0; y--) {
 				pixelTypeDistance (y, x, 1, 0, (int)ground.Mountain, false, pixelDistances, colorMap, fieldEdgeTypes);
 				pixelTypeDistance (y, x, 1, 0, (int)ground.Water, false, pixelDistances, colorMap, fieldEdgeTypes);
+				pixelTypeDistance (y, x, 1, 0, (int)ground.City, false, pixelDistances, colorMap, fieldEdgeTypes);
 				fieldDistance (y, x, 1, 0, false, pixelDistances, colorMap, fieldEdgeTypes);
 			}
 		}
@@ -97,6 +145,7 @@ public class ImageDistances
 			for (int x = 0; x < pixelDistances.GetLength (1); x++) {
 				pixelTypeDistance (y, x, 0, -1, (int)ground.Mountain, false, pixelDistances, colorMap, fieldEdgeTypes);
 				pixelTypeDistance (y, x, 0, -1, (int)ground.Water, false, pixelDistances, colorMap, fieldEdgeTypes);
+				pixelTypeDistance (y, x, 0, -1, (int)ground.City, false, pixelDistances, colorMap, fieldEdgeTypes);
 				fieldDistance (y, x, 0, -1, false, pixelDistances, colorMap, fieldEdgeTypes);
 			}
 		}

@@ -3,12 +3,12 @@ using System.Collections;
 using System.Linq; // used for Sum of array
 
 [ExecuteInEditMode]
-public class SplitTerrain : MonoBehaviour {
-	
+public class SplitTerrains : MonoBehaviour {
+
 	void Start () {
 		// Get the attached terrain component
 		Terrain terrain = GetComponent<Terrain>();
-		
+
 		// Get a reference to the terrain data
 		TerrainData terrainData = terrain.terrainData;
 
@@ -48,7 +48,7 @@ public class SplitTerrain : MonoBehaviour {
 		terrainData4.SetDetailResolution (terrainData.detailResolution / 2, 8);
 		terrainData4.alphamapResolution = terrainData.alphamapResolution/2;
 		terrainData4.size = new Vector3 (terrainData.size.x/2f, terrainData.size.y, terrainData.size.z/2f);
-	
+
 		float[,] heightmap1 = new float[terrainData1.heightmapResolution, terrainData1.heightmapResolution];
 		float[,] heightmap2 = new float[terrainData2.heightmapResolution, terrainData2.heightmapResolution];
 		float[,] heightmap3 = new float[terrainData3.heightmapResolution, terrainData3.heightmapResolution];
@@ -92,10 +92,10 @@ public class SplitTerrain : MonoBehaviour {
 		terrainData3.SetHeights (0, 0, heightmap3);
 		terrainData4.SetHeights (0, 0, heightmap4);
 
-		GameObject go1 = Terrain.CreateTerrainGameObject (terrainData1);
-		GameObject go2 = Terrain.CreateTerrainGameObject (terrainData2);
-		GameObject go3 = Terrain.CreateTerrainGameObject (terrainData3);
-		GameObject go4 = Terrain.CreateTerrainGameObject (terrainData4);
+		//GameObject go1 = Terrain.CreateTerrainGameObject (terrainData1);
+		//GameObject go2 = Terrain.CreateTerrainGameObject (terrainData2);
+		//GameObject go3 = Terrain.CreateTerrainGameObject (terrainData3);
+		//GameObject go4 = Terrain.CreateTerrainGameObject (terrainData4);
 		//go1.transform.position.Set (0, 0, 0);
 		//go2.transform.position.Set (terrainData1.size.x, 0, 0);
 		//go3.transform.position.Set (0, 0, terrainData1.size.z);

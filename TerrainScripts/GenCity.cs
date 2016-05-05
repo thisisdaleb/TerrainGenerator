@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 
 [ExecuteInEditMode]
-public class GenGrass : MonoBehaviour
+public class GenCity : MonoBehaviour
 {
 	public bool runNow;
 	private int width = 2049; //These 2 defined by input! Each terrain 4097 pixels wide and long
@@ -134,7 +134,7 @@ public class GenGrass : MonoBehaviour
 				} else if (colorMap [y, x] == (int)ground.Water) { //water 
 					finalHeightMap [y, x] = 0.0f + (float)(pixelDistances [y, x]-1) * 0.02f;
 				} else { //city
-					finalHeightMap [y, x] = 0.0f;
+					finalHeightMap [y, x] = 0.5f;
 				}
 			}
 		}
