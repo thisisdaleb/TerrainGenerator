@@ -98,6 +98,8 @@ public class GenCity : MonoBehaviour
 		//integer value is normalized to 0.0f and the maximum value is at 1.0f
 		createFloatMatrix ();
 
+		addBuildings ();
+
 		//Create terrain and send it through the world
 		createTerrain ();
 		
@@ -114,27 +116,29 @@ public class GenCity : MonoBehaviour
 			
 			for (int x = 0; x < width-1; x++) {
 				
-				if (colorMap [y, x] == (int)ground.Field) { //field
+				if (colorMap [y, x] == (int)ground.Mountain) { //mountains
+					finalHeightMap [y, x] = 0.0f + (float)(pixelDistances [y, x]-1) * 0.02f;
+					
+				} else if (colorMap [y, x] == (int)ground.Water) { //water 
+					finalHeightMap [y, x] = 0.0f + (float)(pixelDistances [y, x]-1) * 0.02f;
+				} 
+				//CITIES AND FIELDS
+				else { 
+					if (colorMap [y, x] == (int)ground.City && pixelDistances [y, x] > 6)
+						fieldEdgeTypes[y, x] = false;
 					if (fieldEdgeTypes [y, x] == true) {
 						if (pixelDistances [y, x] < 51)
 							finalHeightMap [y, x] = 0.6f + smoothInterpolate (50f, 0f, pixelDistances [y, x] / 50f) /50f * 0.4f;
-							//the last decimal number is how much of the field height this should take up.
+						//the last decimal number is how much of the field height this should take up.
 						else
 							finalHeightMap [y, x] = 0.6f;
-							//this needs to be equal to that last number
+						//this needs to be equal to that last number
 					} else {
 						if (pixelDistances [y, x] < 101) 
 							finalHeightMap [y, x] = 0.0f + smoothInterpolate (0f, 100f, pixelDistances [y, x] / 100f) / 100f *0.6f;
 						else
 							finalHeightMap [y, x] = 0.6f;
 					}
-				} else if (colorMap [y, x] == (int)ground.Mountain) { //mountains
-					finalHeightMap [y, x] = 0.0f + (float)(pixelDistances [y, x]-1) * 0.02f;
-					
-				} else if (colorMap [y, x] == (int)ground.Water) { //water 
-					finalHeightMap [y, x] = 0.0f + (float)(pixelDistances [y, x]-1) * 0.02f;
-				} else { //city
-					finalHeightMap [y, x] = 0.5f;
 				}
 			}
 		}
@@ -234,14 +238,31 @@ public class GenCity : MonoBehaviour
 	{
 		System.Random rand = new System.Random ();
 		for (int y = 1; y < length - 2; y++) {
-
 			for (int x = 1; x < width - 2; x++) {
-				if(colorMap[y, x] == (int) ground.Mountain && pixelDistances[y, x] > 1)
-					finalHeightMap [y, x] += (float) (rand.NextDouble()*0.002f);
-				else if (colorMap[y, x] == (int) ground.Field && (fieldEdgeTypes[y, x] || pixelDistances[y, x] > 2))
-					finalHeightMap [y, x] += (float) (rand.NextDouble()*0.0003f);
+				if (colorMap [y, x] == (int)ground.Mountain && pixelDistances [y, x] > 1)
+					finalHeightMap [y, x] += (float)(rand.NextDouble () * 0.002f);
+				else if (colorMap [y, x] == (int)ground.Field && (fieldEdgeTypes [y, x] || pixelDistances [y, x] > 2)) 
+				{
+					finalHeightMap [y, x] += (float)(rand.NextDouble () * 0.0003f);
+				}
+				else if (colorMap [y, x] == (int)ground.City)
+				{
+					finalHeightMap [y, x] += (float)(rand.NextDouble () * 0.0002f);
+				}
 			}
-		
+		}
+	}
+
+	private void addBuildings()
+	{
+		for (int y = 1; y < length - 2; y++) {
+			for (int x = 1; x < width - 2; x++) {
+				if (colorMap [y, x] == (int)ground.City) {
+					if (!((x % 20 < 8) || (y % 24 < 8))) {
+						finalHeightMap [y, x] += 0.012f;
+					}
+				}
+			}
 		}
 	}
 
