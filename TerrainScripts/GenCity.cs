@@ -92,6 +92,7 @@ public class GenCity : MonoBehaviour
 	void convertInputIntoMap ()
 	{
 		print ("Start running processor melting program.");
+		runNow = false;
 		
 		ImageDistances setImage = new ImageDistances ();
 		setImage.setColors (tex, width, length, pixelDistances, colorMap, fieldEdgeTypes);
@@ -109,8 +110,7 @@ public class GenCity : MonoBehaviour
 
 		//Create terrain and send it through the world
 		createTerrain ();
-		
-		runNow = false;
+
 		refreshVariables ();
 	}
 	

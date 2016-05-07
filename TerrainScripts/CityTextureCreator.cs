@@ -21,17 +21,34 @@ public class CityTextureCreator
 		int placeX = 0;
 		int placeY = 0;
 
-		while (loopY < imageLoopY-1) {
-			while (loopX < imageLoopX-1) {
+		Color[] texColor1D = tex.GetPixels ();
+
+		Color[,] texColors = new Color[imageLoopX, imageLoopY];
+
+		for(int Cy = 0; Cy < imageLoopY; Cy++)
+		{
+			for(int Cx = 0; Cx < imageLoopX; Cx++)
+			{
+				texColors [Cx, Cy] = texColor1D[(Cy*imageLoopY)+Cx];
+			}
+		}
+
+		while (loopY < imageLoopY-2) {
+			while (loopX < imageLoopX-2) {
 				while (placeY < yPlaced) {
 					while (placeX < xPlaced) {
 						if ((yPlaced * loopY) + placeY < length && (xPlaced * loopX) + placeX < width) {
 
-							if (tex.GetPixel (loopX, loopY).r > 0.7) { //mountains
+							if (checkRedSection(texColors,loopX, loopY, 0.7f)) 
+							{ //mountains
 								heightMap[(yPlaced * loopY) + placeY, (xPlaced * loopX) + placeX] += 0.01f;
-							} else if (tex.GetPixel (loopX, loopY).b > 0.7) { //water 
+							} 
+							else if (checkBlueSection(texColors,loopX, loopY, 0.7f)) 
+							{//water 
 								heightMap[(yPlaced * loopY) + placeY, (xPlaced * loopX) + placeX] += 0.03f;
-							} else if(tex.GetPixel (loopX, loopY).g > 0.7){
+							} 
+							else if (checkGreenSection(texColors,loopX, loopY, 0.7f)) 
+							{
 								heightMap[(yPlaced * loopY) + placeY, (xPlaced * loopX) + placeX] += 0.06f;
 							}
 						}
@@ -43,13 +60,53 @@ public class CityTextureCreator
 				placeY = 0;
 				loopX++;
 			}
-			loopX = 0;
+			loopX = 1;
 			loopY++;
 		}
 	}
 		
-	private bool checkSection()
+	private bool checkRedSection(Color[,] texColors, int loopX, int loopY, float amount)
 	{
-		return true;
+		if(texColors[loopX, loopY].r > amount ||
+			texColors[loopX+1, loopY].r > amount ||
+			texColors[loopX-1, loopY].r > amount ||
+			texColors[loopX, loopY+1].r > amount ||
+			texColors[loopX, loopY-1].r > amount ||
+			texColors[loopX-1, loopY-1].r > amount ||
+			texColors[loopX+1, loopY-1].r > amount ||
+			texColors[loopX-1, loopY+1].r > amount ||
+			texColors[loopX+1, loopY+1].r > amount)
+			return true;
+		return false;
+	}
+
+	private bool checkBlueSection(Color[,] texColors, int loopX, int loopY, float amount)
+	{	
+		if(texColors[loopX, loopY].b > amount ||
+			texColors[loopX+1, loopY].b > amount ||
+			texColors[loopX-1, loopY].b > amount ||
+			texColors[loopX, loopY+1].b > amount ||
+			texColors[loopX, loopY-1].b > amount ||
+			texColors[loopX-1, loopY-1].b > amount ||
+			texColors[loopX+1, loopY-1].b > amount ||
+			texColors[loopX-1, loopY+1].b > amount ||
+			texColors[loopX+1, loopY+1].b > amount)
+			return true;
+		return false;
+	}
+
+	private bool checkGreenSection(Color[,] texColors, int loopX, int loopY, float amount)
+	{
+		if(texColors[loopX, loopY].g > amount ||
+			texColors[loopX+1, loopY].g > amount ||
+			texColors[loopX-1, loopY].g > amount ||
+			texColors[loopX, loopY+1].g > amount ||
+			texColors[loopX, loopY-1].g > amount ||
+			texColors[loopX-1, loopY-1].g > amount ||
+			texColors[loopX+1, loopY-1].g > amount ||
+			texColors[loopX-1, loopY+1].g > amount ||
+			texColors[loopX+1, loopY+1].g > amount)
+			return true;
+		return false;
 	}
 }
