@@ -40,7 +40,7 @@ public class ImageDistances
 							} else if (tex.GetPixel (loopX, loopY).b > 0.5) { //water 
 								colorMap [(yPlaced * loopY) + placeY, (xPlaced * loopX) + placeX] = (int)ground.Water;
 
-							} else if(tex.GetPixel (loopX, loopY).g > 0.5){
+							} else if(tex.GetPixel (loopX, loopY).g > 0.1){
 								colorMap [(yPlaced * loopY) + placeY, (xPlaced * loopX) + placeX] = (int)ground.Field;
 							}
 							else{

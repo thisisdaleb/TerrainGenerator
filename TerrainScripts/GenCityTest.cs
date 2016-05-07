@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 
 [ExecuteInEditMode]
-public class GenCity : MonoBehaviour
+public class GenCityTest : MonoBehaviour
 {
 	public bool runNow;
 	private int width = 4097; //These 2 defined by input! Each terrain 4097 pixels wide and long
@@ -29,7 +29,6 @@ public class GenCity : MonoBehaviour
 	public float topFieldLength = 50f;
 	public float bottomFieldLength = 50f;
 	public int grassSize = 2048;
-	public Texture2D cityTex;
 
 	//important note:
 	//boundary of map defined by:
@@ -62,7 +61,6 @@ public class GenCity : MonoBehaviour
 		fieldEdgeTypes = new Boolean[width, length];
 
 		//tex = Resources.Load ("InputPictureG") as Texture2D;
-		cityTex = Resources.Load ("EserimCities") as Texture2D;
 
 		textureList = new Texture2D[3];
 
@@ -263,8 +261,15 @@ public class GenCity : MonoBehaviour
 
 	private void addBuildings()
 	{
-		CityTextureCreator setCity = new CityTextureCreator ();
-		setCity.setBuildings (cityTex, width, length, finalHeightMap);
+		for (int y = 1; y < length - 2; y++) {
+			for (int x = 1; x < width - 2; x++) {
+				if (colorMap [y, x] == (int)ground.City) {
+					if (!((x % 8 < 3) || (y % 8 < 3))) {
+						finalHeightMap [y, x] += 0.042f;
+					}
+				}
+			}
+		}
 	}
 
 	private void createTextures ()
