@@ -397,9 +397,9 @@ public class GenCartoonRand : MonoBehaviour
 	{
 		SplatMapCreator spatMapper = new SplatMapCreator ();
 		if(terrainTexs.Length>3)
-			spatMapper.startTerrainPlacing (terrainData, true, waterSpace, (waterSpace + fieldSpace));
+			spatMapper.startTerrainPlacing (terrainData, true, waterSpace, (waterSpace + fieldSpace), colorMap, (int)ground.City);
 		else
-			spatMapper.startTerrainPlacing (terrainData, false, waterSpace, (waterSpace + fieldSpace));
+			spatMapper.startTerrainPlacing (terrainData, false, waterSpace, (waterSpace + fieldSpace), colorMap, (int)ground.City);
 		//GameObject go = (GameObject)Instantiate(Resources.Load("WATERTIME"));
 		//go.transform.position = (new Vector3 (4000f, (float) waterHeight - 3f, 4000f));
 		//go.transform.localScale = new Vector3 (5000f, 0.001f, 5000f);

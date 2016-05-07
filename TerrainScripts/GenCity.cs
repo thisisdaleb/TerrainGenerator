@@ -294,9 +294,9 @@ public class GenCity : MonoBehaviour
 	{
 		SplatMapCreator spatMapper = new SplatMapCreator ();
 		if(terrainTexs.Length>3)
-			spatMapper.startTerrainPlacing (terrainData, true, waterSpace, (waterSpace+fieldSpace));
+			spatMapper.startTerrainPlacing (terrainData, true, waterSpace, (waterSpace+fieldSpace), colorMap, (int)ground.City);
 		else
-			spatMapper.startTerrainPlacing (terrainData, false, waterSpace, (waterSpace+fieldSpace));
+			spatMapper.startTerrainPlacing (terrainData, false, waterSpace, (waterSpace+fieldSpace), colorMap, (int)ground.City);
 		//GameObject go = (GameObject)Instantiate(Resources.Load("WATERTIME"));
 		//go.transform.position = (new Vector3 (4000f, (float) waterHeight - 3f, 4000f));
 		//go.transform.localScale = new Vector3 (5000f, 0.001f, 5000f);
@@ -312,13 +312,14 @@ public class GenCity : MonoBehaviour
 		details [0].prototypeTexture = grassTex;
 		details [0].maxWidth = 4f;
 		details [0].minWidth = 3.5f;
+		details [0].healthyColor = details [0].dryColor = new Color (0, 233, 158);
 		terrainData.detailPrototypes = details;
 	}
 
 	private void placeGrass (TerrainData terrainData)
 	{
 		GrassCreator grassMap = new GrassCreator ();
-		grassMap.startGrassPlacing (terrainData, colorMap, grassSize, 8, waterSpace, (waterSpace+fieldSpace));
+		grassMap.startGrassPlacing (terrainData, colorMap, grassSize, 8, waterSpace, (waterSpace+fieldSpace), (int) ground.City);
 	}
 	
 	private void createTerrain ()
@@ -326,8 +327,8 @@ public class GenCity : MonoBehaviour
 		TerrainData terrainData = new TerrainData ();
 		
 		terrainData.heightmapResolution = width;
-		terrainData.baseMapResolution = 2048;
-		terrainData.alphamapResolution = 2048;
+		terrainData.baseMapResolution = width-1;
+		terrainData.alphamapResolution = width-1;
 		
 		terrainData.SetHeights (0, 0, finalHeightMap);
 		terrainData.size = new Vector3 (terrainWidth, terrainHeight, terrainLength);

@@ -7,7 +7,7 @@ using System.Linq;
 public class GrassCreator
 {
 	
-	public void startGrassPlacing (TerrainData terrainData, int[,] colorMap, int grassDensity, int patchDetail, float waterTop, float fieldTop)
+	public void startGrassPlacing (TerrainData terrainData, int[,] colorMap, int grassDensity, int patchDetail, float waterTop, float fieldTop, int cityGround)
 	{
 		terrainData.SetDetailResolution(grassDensity, patchDetail);
 
@@ -29,7 +29,7 @@ public class GrassCreator
 				// Calculate the steepness of the terrain
 				float steepness = terrainData.GetSteepness(y_01,x_01);
 
-				if (height > waterTop && height < fieldTop && steepness < 20f) {
+				if (height > waterTop && height < fieldTop && steepness < 20f && colorMap[i*2, j*2] != cityGround) {
 					map [i, j] = 16;
 				}
 			}

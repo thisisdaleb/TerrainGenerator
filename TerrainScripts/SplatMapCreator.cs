@@ -4,11 +4,10 @@ using System.Linq; // used for Sum of array
 
 public class SplatMapCreator {
 	
-	public void startTerrainPlacing(TerrainData terrainData, bool fourthTexture, float waterTop, float fieldTop){
+	public void startTerrainPlacing(TerrainData terrainData, bool fourthTexture, float waterTop, float fieldTop, int[,] colorMap, int ground){
 
 		// Splatmap data is stored internally as a 3d array of floats, so declare a new empty array ready for your custom splatmap data:
 		float[, ,] splatmapData = new float[terrainData.alphamapWidth, terrainData.alphamapHeight, terrainData.alphamapLayers];
-		
 		Vector3 terrainDataSize = terrainData.size;
 		
 		for (int y = 0; y < terrainData.alphamapHeight; y++)
@@ -72,11 +71,18 @@ public class SplatMapCreator {
 					splatWeights[2] = 0f;
 				}
 				//snow
-				if(height > 0.6f){
+				if(height > 0.9f){
 					splatWeights[0] = 0f;
 					splatWeights [1] = 0f; 
 					splatWeights[2] = 1f;
 				}
+				//city
+				if (colorMap [x*2, y*2] == ground) {
+					splatWeights[0] = 0f;
+					splatWeights[1] = 1f;
+					splatWeights[2] = 0f;
+				}
+
 				// Texture[2] stronger on flatter terrain
 				// Note "steepness" is unbounded, so we "normalise" it by dividing by the extent of heightmap height and scale factor
 				// Subtract result from 1.0 to give greater weighting to flat surfaces

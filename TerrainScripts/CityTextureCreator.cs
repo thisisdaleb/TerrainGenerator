@@ -49,7 +49,7 @@ public class CityTextureCreator
 							} 
 							else if (checkGreenSection(texColors,loopX, loopY, 0.7f)) 
 							{
-								heightMap[(yPlaced * loopY) + placeY, (xPlaced * loopX) + placeX] += 0.06f;
+								heightMap[(yPlaced * loopY) + placeY, (xPlaced * loopX) + placeX] += 0.04f;
 							}
 						}
 						placeX++;
