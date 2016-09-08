@@ -6,6 +6,7 @@ using System.Collections.Generic;
 [ExecuteInEditMode]
 public class GenCity : MonoBehaviour
 {
+	//THIS IS THE CURRENT MAIN PROGRAM FOR GENERATING WORLDS BY INPUT
 	[Tooltip("Checking this box starts the system")]
 	public bool runNow;
 	private int width = 4097; //These 2 defined by input! Each terrain 4097 pixels wide and long

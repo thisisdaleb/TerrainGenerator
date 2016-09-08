@@ -1,10 +1,10 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System;
 using System.Collections.Generic;
 
 [ExecuteInEditMode]
-public class TerrainGeneratorSetPersistence : MonoBehaviour
+public class TerrainGeneratorTestingOutputSpeed : MonoBehaviour
 {
 	//THIS IS THE MAIN TERRAIN GENERATION USING SIMPLEX
 	//
