@@ -13,7 +13,7 @@ public class TerrainGeneratorTestingOutputSpeed : MonoBehaviour
 	bool runNow;
 	bool extraRun = true;
 	private int[,] initColorMap;
-	private int width = 2049; //These 2 defined by input! Each terrain 4097 pixels wide and long
+	private int width = 4097; //These 2 defined by input! Each terrain 4097 pixels wide and long
 	private int length; //Input is amount of tiles in width and length (Ex: 2x3 tiles)
 	private float[,] finalHeightMap; //defines the elevation of each height point between 0.0 and 1.0
 	private int terrainWidth = 30000; //defines the width of the terrain in meters
@@ -32,29 +32,17 @@ public class TerrainGeneratorTestingOutputSpeed : MonoBehaviour
 	private float[, ] samples7;
 	private float[, ] samples8;
 	private float[, ] samples9;
+	private System.Diagnostics.Stopwatch timer = new System.Diagnostics.Stopwatch ();
 	
 	//important note:
 	//boundary of map defined by:
 	//!((k+y) < 0 || (k + y) > (length-1) || (z + x) < 0 || (z + x) > (width-1))
-	
-	enum ground : int
-	{
-		Field,
-		Mountain,
-		Water,
-		City }
-	;
-	
+
 	// Use this for initialization
 	void Start ()
 	{
 		length = width;
 		runNow = true;
-
-		matSizes = new int[10];
-		for (int mats = 0; mats < (matSizes.GetLength(0)); mats++) {
-			matSizes [mats] = 4 * ((int)Math.Pow (2, mats));
-		}
 
 		samples0 = new float[width, width];
 		samples1 = new float[width, width];
@@ -66,33 +54,46 @@ public class TerrainGeneratorTestingOutputSpeed : MonoBehaviour
 		samples7 = new float[width, width];
 		samples8 = new float[width, width];
 		samples9 = new float[width, width];
+
 	}
 	
 	// Update is called once per frame
 	void Update ()
 	{
 		if (runNow && extraRun) {
+			runNow = false;
+			extraRun = false;
+
+			//timerTest ();
 			convertInputIntoMap ();
 		}
+	}
+
+	void timerTest(){
+		print ("starting Timer");
+		timer.Start ();
+		//time assigning single float random number
+		simplex = new SimplexNoiseGenerator ((long)(UnityEngine.Random.Range (int.MinValue, int.MaxValue)));
+		float simplexNumber = 0;
+		for(long x = 0; x<22400000;x++)
+			simplexNumber = (float)(simplex.Evaluate (x, 0));
+		//print times
+		print ("Time: " + timer.ElapsedMilliseconds);
+		print ("final Number:" + simplexNumber);
+		timer.Reset ();
+		//timer for 
+		timer.Start ();
+		createSimplexMatrix ();
+		print ("Time for full simplex: " + timer.ElapsedMilliseconds);
 	}
 	
 	void convertInputIntoMap ()
 	{
 		//yield return null;
 		print ("Start running processor melting program.");
-		
-		////import picture,
-		//createMatrix of colors
-		
-		//setColors();
-		
-		//testCreation();
-		
+
 		//create Simplex Noise matrix
 		createSimplexMatrix ();
-		//add simplex noise to grass, water, and mountains
-		//makes sure areas near cities have a gentle enough slope to leave
-		//add complex Simplex Noise for mountains
 		
 		//create matrix of floats, set to the integer matrix where the minimum
 		//integer value is normalized to 0.0f and the maximum value is at 1.0f
@@ -102,43 +103,7 @@ public class TerrainGeneratorTestingOutputSpeed : MonoBehaviour
 		
 		//Create terrain and send it through the world
 		createTerrain ();
-		
-		runNow = false;
-		extraRun = false;
 	}
-	
-	void setColors ()
-	{
-		
-	}
-	
-	//##
-	//START OF TEST METHODS
-	//##
-	private void testCreation ()
-	{
-		//Not how it will work, this is just a test method, remember!
-		initColorMap = new int[length, width];
-		for (int k = 0; k<length; k++) {
-			for (int z = 0; z < width; z++) {
-				if (k < length / 5 * 2) {
-					initColorMap [k, z] = (int)ground.Mountain;
-				} else if (k < length / 5 * 3) {
-					initColorMap [k, z] = (int)ground.Field;
-				} else if (k < length / 5 * 4) {
-					initColorMap [k, z] = (int)ground.City;
-				} else {
-					initColorMap [k, z] = (int)ground.Water;
-				}
-			}
-		}
-	}
-	
-	//##
-	//END OF TEST METHODS
-	//##
-	
-	
 	/// <summary>
 	/// ######################
 	/// ######################
@@ -149,9 +114,15 @@ public class TerrainGeneratorTestingOutputSpeed : MonoBehaviour
 	
 	private void createSimplexMatrix ()
 	{
+
+		matSizes = new int[11]; //11 for 4096, 10 for 2048, 9 for 1024, etc...
+		for (int mats = 0; mats < (matSizes.GetLength(0)); mats++) {
+			matSizes [mats] = 4 * ((int)Math.Pow (2, mats));
+		}
+
 		noiseMat = new List<float[,]> ();
 		
-		for (int noiseNumber= 0; noiseNumber<10; noiseNumber++) {
+		for (int noiseNumber= 0; noiseNumber<matSizes.Length; noiseNumber++) {
 			simplex = new SimplexNoiseGenerator ((long)(UnityEngine.Random.Range (int.MinValue, int.MaxValue)));
 			noiseMat.Add (new float[matSizes [noiseNumber], matSizes [noiseNumber]]);
 			for (int y = 0; y < matSizes[noiseNumber]; y++) {
@@ -164,7 +135,7 @@ public class TerrainGeneratorTestingOutputSpeed : MonoBehaviour
 	
 	private void createFloatMatrix ()
 	{
-		float[] persistence = new float[10]; 
+		float[] persistence = new float[11]; 
 
 		//Fraction of how much each level of noise is worth compared to the next level
 		float perst = 0.4f; 
@@ -203,7 +174,7 @@ public class TerrainGeneratorTestingOutputSpeed : MonoBehaviour
 			samples7 = smartestInterpolation (noiseMat [7], 3);
 		}
 
-		for (int z = 0; z < 8; z++) {
+		for (int z = 0; z < 10; z++) {
 			persistence[z] = (float)(Math.Pow (perst, z));
 		}
 		
@@ -220,6 +191,8 @@ public class TerrainGeneratorTestingOutputSpeed : MonoBehaviour
 				finalHeightMap[y, x] += samples8[y, x]*persistence[8];
 				if(width>2000)
 					finalHeightMap[y, x] += samples9[y, x]*persistence[9];
+				if (width > 4000)
+					finalHeightMap [y, x] += noiseMat[10][y, x]*persistence[10];
 			}
 		}
 		
