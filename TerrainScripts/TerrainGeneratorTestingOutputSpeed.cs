@@ -13,7 +13,7 @@ public class TerrainGeneratorTestingOutputSpeed : MonoBehaviour
 	bool runNow;
 	bool extraRun = true;
 	private int[,] initColorMap;
-	private int width = 4097; //These 2 defined by input! Each terrain 4097 pixels wide and long
+	private int width = 2049; //These 2 defined by input! Each terrain 4097 pixels wide and long
 	private int length; //Input is amount of tiles in width and length (Ex: 2x3 tiles)
 	private float[,] finalHeightMap; //defines the elevation of each height point between 0.0 and 1.0
 	private int terrainWidth = 30000; //defines the width of the terrain in meters
@@ -139,7 +139,6 @@ public class TerrainGeneratorTestingOutputSpeed : MonoBehaviour
 
 		//Fraction of how much each level of noise is worth compared to the next level
 		float perst = 0.4f; 
-
 
 		finalHeightMap = new float[length, width];
 		if (width > 4000) {
