@@ -5,3 +5,5 @@
 *.meta
 README.md~
 .README.md.swp
+*.meta
+.gitignore~
