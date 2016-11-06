@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 
 [ExecuteInEditMode]
-public class TerrainGeneratorTestingOutputSpeed : MonoBehaviour
+public class TerrainGeneratorSmoothInterpolation : MonoBehaviour
 {
 	//THIS IS THE MAIN TERRAIN GENERATION USING SIMPLEX
 	//
@@ -16,9 +16,9 @@ public class TerrainGeneratorTestingOutputSpeed : MonoBehaviour
 	private int width = 4097; //These 2 defined by input! Each terrain 4097 pixels wide and long
 	private int length; //Input is amount of tiles in width and length (Ex: 2x3 tiles)
 	private float[,] finalHeightMap; //defines the elevation of each height point between 0.0 and 1.0
-	private int terrainWidth = 30000; //defines the width of the terrain in meters
-	private int terrainHeight = 4000; //defines the maximum possible height of the terrain
-	private int terrainLength = 30000; //defines the length oWf the terrain in meters
+	private int terrainWidth = 5000; //defines the width of the terrain in meters
+	private int terrainHeight = 1000; //defines the maximum possible height of the terrain
+	private int terrainLength = 5000; //defines the length oWf the terrain in meters
 	private SimplexNoiseGenerator simplex;
 	private List<float[,]> noiseMat;
 	private int[] matSizes;
@@ -324,8 +324,8 @@ public class TerrainGeneratorTestingOutputSpeed : MonoBehaviour
 		TerrainData terrainData = new TerrainData ();
 		
 		terrainData.heightmapResolution = width;
-		terrainData.baseMapResolution = 1024;
-		terrainData.SetDetailResolution (1024, 16);
+		terrainData.baseMapResolution = width-1;
+		terrainData.alphamapResolution = width-1;
 		
 		terrainData.SetHeights (0, 0, finalHeightMap);
 		terrainData.size = new Vector3 (terrainWidth, terrainHeight, terrainLength);
@@ -334,6 +334,8 @@ public class TerrainGeneratorTestingOutputSpeed : MonoBehaviour
 		//terrainData.detailPrototypes = m_detailProtoTypes;
 		GameObject go = Terrain.CreateTerrainGameObject (terrainData);
 		go.transform.position.Set (0, 0, 0);
+		go.GetComponent<Terrain> ().detailObjectDistance = 200;
+		go.GetComponent<Terrain> ().detailObjectDensity = 1F;
 		print ("It made it to the end");
 	}
 	
