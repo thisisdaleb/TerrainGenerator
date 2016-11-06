@@ -13,7 +13,7 @@ public class TerrainGeneratorTestingOutputSpeed : MonoBehaviour
 	bool runNow;
 	bool extraRun = true;
 	private int[,] initColorMap;
-	private int width = 2049; //These 2 defined by input! Each terrain 4097 pixels wide and long
+	private int width = 4097; //These 2 defined by input! Each terrain 4097 pixels wide and long
 	private int length; //Input is amount of tiles in width and length (Ex: 2x3 tiles)
 	private float[,] finalHeightMap; //defines the elevation of each height point between 0.0 and 1.0
 	private int terrainWidth = 30000; //defines the width of the terrain in meters
@@ -41,6 +41,10 @@ public class TerrainGeneratorTestingOutputSpeed : MonoBehaviour
 	// Use this for initialization
 	void Start ()
 	{
+		refreshVariables ();
+	}
+
+	void refreshVariables(){
 		length = width;
 		runNow = true;
 
@@ -55,8 +59,14 @@ public class TerrainGeneratorTestingOutputSpeed : MonoBehaviour
 		samples8 = new float[width, width];
 		samples9 = new float[width, width];
 
+		matSizes = new int[11]; //11 for 4096, 10 for 2048, 9 for 1024, etc...
+		for (int mats = 0; mats < (matSizes.GetLength(0)); mats++) {
+			matSizes [mats] = 4 * ((int)Math.Pow (2, mats));
+		}
+		
+		noiseMat = new List<float[,]> ();
 	}
-	
+
 	// Update is called once per frame
 	void Update ()
 	{
@@ -66,6 +76,7 @@ public class TerrainGeneratorTestingOutputSpeed : MonoBehaviour
 
 			//timerTest ();
 			convertInputIntoMap ();
+			refreshVariables();
 		}
 	}
 
@@ -114,20 +125,14 @@ public class TerrainGeneratorTestingOutputSpeed : MonoBehaviour
 	
 	private void createSimplexMatrix ()
 	{
-
-		matSizes = new int[11]; //11 for 4096, 10 for 2048, 9 for 1024, etc...
-		for (int mats = 0; mats < (matSizes.GetLength(0)); mats++) {
-			matSizes [mats] = 4 * ((int)Math.Pow (2, mats));
-		}
-
-		noiseMat = new List<float[,]> ();
 		
 		for (int noiseNumber= 0; noiseNumber<matSizes.Length; noiseNumber++) {
 			simplex = new SimplexNoiseGenerator ((long)(UnityEngine.Random.Range (int.MinValue, int.MaxValue)));
 			noiseMat.Add (new float[matSizes [noiseNumber], matSizes [noiseNumber]]);
 			for (int y = 0; y < matSizes[noiseNumber]; y++) {
 				for (int x = 0; x < matSizes[noiseNumber]; x++) {
-					noiseMat [noiseNumber] [y, x] = (float)(simplex.Evaluate (x, y));
+					//noiseMat [noiseNumber] [y, x] = (float)(simplex.Evaluate (x, y));
+					noiseMat [noiseNumber] [y, x] = (float)(UnityEngine.Random.Range (-1, 1));
 				}
 			}
 		}
@@ -191,7 +196,7 @@ public class TerrainGeneratorTestingOutputSpeed : MonoBehaviour
 				if(width>2000)
 					finalHeightMap[y, x] += samples9[y, x]*persistence[9];
 				if (width > 4000)
-					finalHeightMap [y, x] += noiseMat[10][y, x]*persistence[10];
+					finalHeightMap [y, x] += noiseMat[10][y, x]*persistence[9];
 			}
 		}
 		
@@ -254,7 +259,7 @@ public class TerrainGeneratorTestingOutputSpeed : MonoBehaviour
 					Q3 = oldMat[y/multiplier+1, x/multiplier];
 					Q4 = oldMat[y/multiplier+1, x/multiplier+1];
 					
-					newMat[y, x] = fixedCalc((float)(x-x1)/(x2-x1), (float)(y-y1)/(y2-y1), Q1, Q2, Q3, Q4);
+					newMat[y, x] = fixedSmoothCalc((float)(x-x1)/(x2-x1), (float)(y-y1)/(y2-y1), Q1, Q2, Q3, Q4);
 				}
 			}
 		}
@@ -294,6 +299,25 @@ public class TerrainGeneratorTestingOutputSpeed : MonoBehaviour
 	private float fixedCalc(float fractionX, float fractionY, float Q1, float Q2, float Q3, float Q4){
 		return (1 - fractionX) * ((1 - fractionY) * Q1 + fractionY * Q3) + fractionX * ((1 - fractionY) * Q2 + fractionY * Q4);
 	}
+
+	//sets fractions to values that make them weighted towards whichever point they are closest to.
+	private float fixedSmoothCalc(float fractionX, float fractionY, float Q1, float Q2, float Q3, float Q4){
+		float ft = fractionX * 3.1415927f;
+		float fX = (float)(1 - Math.Cos (ft)) * 0.5f;
+		ft = fractionY * 3.1415927f;
+		float fY = (float)(1 - Math.Cos (ft)) * 0.5f;
+		return fixedCalc (fX, fY, Q1, Q2, Q3, Q4);
+	}
+
+	//inputs A and B are the numbers that are being interpolated between.
+	//X is the fraction of difference between A and B.
+	private float smoothInterpolate (float a, float b, float x)
+	{
+		float ft = x * 3.1415927f;
+		float f = (float)(1 - Math.Cos (ft)) * 0.5f;
+		
+		return  (float)(a * (1 - f) + b * f);
+	}
 	
 	private void createTerrain ()
 	{
@@ -311,16 +335,6 @@ public class TerrainGeneratorTestingOutputSpeed : MonoBehaviour
 		GameObject go = Terrain.CreateTerrainGameObject (terrainData);
 		go.transform.position.Set (0, 0, 0);
 		print ("It made it to the end");
-	}
-	
-	//inputs A and B are the numbers that are being interpolated between.
-	//X is the fraction of difference between A and B.
-	private float smoothInterpolate (float a, float b, float x)
-	{
-		float ft = x * 3.1415927f;
-		float f = (float)(1 - Math.Cos (ft)) * 0.5f;
-		
-		return  (float)(a * (1 - f) + b * f);
 	}
 	
 	private float interpolate(float a, float b, float x){
