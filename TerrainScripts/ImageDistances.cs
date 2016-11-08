@@ -62,6 +62,12 @@ public class ImageDistances
 		setDistances (pixelDistances, colorMap, fieldEdgeTypes);
 	}
 
+	//An algorithm to find the hypotenuse distance would be to have a horizontalDist matrix
+	//and a verticalDist matrix
+	//anytime pixelDistances[] changes, grab the last pixel's vertical/horizontal distance
+	//and add 1 to the correct variable.
+	//making pixelDistances[] just a matrix for assistance in finding the real distances
+
 	private void setDistances (float[,] pixelDistances, int[,] colorMap, bool[,] fieldEdgeTypes)
 	{
 		for (int y = 0; y < pixelDistances.GetLength (0); y++) {
