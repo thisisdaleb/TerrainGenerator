@@ -2,7 +2,7 @@
 A program that takes a simple input image to create a complex 3d environment.
 
 To create a random terrain using Simplex noise:
-Drag "RandomTerrainGenerator" onto an empty object in Unity. Make sure to delete the empty object before testing!
+Drag "RandomTerrainGenerator" onto an empty object in Unity and click "Run Now".
 
 To create a terrain using an image: 
 Drag "GenCity" onto an empty object, then make sure to set "Tex" to the image of your choice. 

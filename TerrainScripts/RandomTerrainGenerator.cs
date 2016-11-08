@@ -10,7 +10,10 @@ public class RandomTerrainGenerator : MonoBehaviour
 	//
 	//
 	//
-	bool runNow;
+
+	[Tooltip("Checking this box starts the system")]
+	public bool runNow;
+
 	bool extraRun = true;
 	private int[,] initColorMap;
 	private int width = 4097; //These 2 defined by input! Each terrain 4097 pixels wide and long
@@ -33,6 +36,10 @@ public class RandomTerrainGenerator : MonoBehaviour
 	private float[, ] samples8;
 	private float[, ] samples9;
 	private System.Diagnostics.Stopwatch timer = new System.Diagnostics.Stopwatch ();
+
+	SplatPrototype[] terrainTexs;		//set of textures used by map
+	[Tooltip("Textures placed on the terrain")]
+	public Texture2D[] textureList; //These textures accessable in the GUI are added to terrainTexs
 	
 	//important note:
 	//boundary of map defined by:
@@ -46,7 +53,7 @@ public class RandomTerrainGenerator : MonoBehaviour
 
 	void refreshVariables(){
 		length = width;
-		runNow = true;
+		runNow = false;
 
 		samples0 = new float[width, width];
 		samples1 = new float[width, width];
@@ -318,6 +325,32 @@ public class RandomTerrainGenerator : MonoBehaviour
 		
 		return  (float)(a * (1 - f) + b * f);
 	}
+
+
+
+	/*not in use yet
+	private void createTextures ()
+	{
+		for (int k = 0; k < textureList.Length; k++) {
+			terrainTexs [k] = new SplatPrototype ();
+			terrainTexs [k].texture = textureList [k];
+			terrainTexs [k].tileSize = new Vector2 (10, 10);
+		}
+	}
+
+	private void placeTextures (TerrainData terrainData)
+	{
+		SplatMapCreator spatMapper = new SplatMapCreator ();
+		if(terrainTexs.Length>3)
+			spatMapper.startTerrainPlacing (terrainData, true, 0.01, (waterSpace+fieldSpace), colorMap, (int)ground.City);
+		else
+			spatMapper.startTerrainPlacing (terrainData, false, waterSpace, (waterSpace+fieldSpace), colorMap, (int)ground.City);
+		//GameObject go = (GameObject)Instantiate(Resources.Load("WATERTIME"));
+		//go.transform.position = (new Vector3 (4000f, (float) waterHeight - 3f, 4000f));
+		//go.transform.localScale = new Vector3 (5000f, 0.001f, 5000f);
+	}
+	*/
+
 	
 	private void createTerrain ()
 	{
@@ -329,9 +362,14 @@ public class RandomTerrainGenerator : MonoBehaviour
 		
 		terrainData.SetHeights (0, 0, finalHeightMap);
 		terrainData.size = new Vector3 (terrainWidth, terrainHeight, terrainLength);
-		//terrainData.splatPrototypes = m_splatPrototypes;
-		//terrainData.treePrototypes = m_treeProtoTypes;
-		//terrainData.detailPrototypes = m_detailProtoTypes;
+
+		//place textures on map
+		/* //not activated yet
+		createTextures ();
+		terrainData.splatPrototypes = terrainTexs;
+		placeTextures (terrainData);
+		*/
+
 		GameObject go = Terrain.CreateTerrainGameObject (terrainData);
 		go.transform.position.Set (0, 0, 0);
 		go.GetComponent<Terrain> ().detailObjectDistance = 200;

@@ -29,7 +29,7 @@ public class GenCity : MonoBehaviour
 	[Tooltip("The image used for making the world")]
 	public Texture2D tex;
 	[Tooltip("Textures placed on the terrain")]
-	public Texture2D[] textureList;
+	public Texture2D[] textureList; //These textures accessable in the GUI are added to terrainTexs
 	[Tooltip("height of water section in meters")]
 	public int waterHeight = 350;
 	[Tooltip("height of field section in meters")]
@@ -85,10 +85,7 @@ public class GenCity : MonoBehaviour
 
 		textureList [2] = Resources.Load ("Snow") as Texture2D;
 
-		if(textureList.Length == 4)
-			terrainTexs = new SplatPrototype [4];
-		else	
-			terrainTexs = new SplatPrototype [3];
+		terrainTexs = new SplatPrototype [textureList.Length];
 	}
 	
 	// Update is called once per frame
