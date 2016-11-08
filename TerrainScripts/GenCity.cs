@@ -7,22 +7,27 @@ using System.Collections.Generic;
 public class GenCity : MonoBehaviour
 {
 	//THIS IS THE CURRENT MAIN PROGRAM FOR GENERATING WORLDS BY INPUT
+
+	private int width = 4097; 			//These 2 defined by input! Each terrain 4097 pixels wide and long
+	private int length;
+	private float[,] finalHeightMap;	//defines the elevation of each height point between 0.0 and 1.0
+	private int terrainHeight = 2400;	//defines the maximum possible height of the terrain
+	private int[,] colorMap;			//the terrain type of each pixel
+	private float[, ] pixelDistances;	//the distance from each pixel to a pixel of a different color
+	private Boolean[, ] fieldEdgeTypes;	//tells field pixels whether they are closest to mountains or water
+	SplatPrototype[] terrainTexs;		//set of textures used by map
+	private float waterSpace;			//percentage of map height used by water
+	private float fieldSpace;			//percentage of map height used by field
+
+	//public values that users can edit in GUI.
 	[Tooltip("Checking this box starts the system")]
 	public bool runNow;
-	private int width = 4097; //These 2 defined by input! Each terrain 4097 pixels wide and long
-	private int length; //Input is amount of tiles in width and length (Ex: 2x3 tiles)
-	private float[,] finalHeightMap; //defines the elevation of each height point between 0.0 and 1.0
-	private int terrainHeight = 2400; //defines the maximum possible height of the terrain
 	[Tooltip("The width in meters of the terrain")]
 	public int terrainWidth = 7000; //defines the width of the terrain in meters
 	[Tooltip("The length in meters of the terrain")]
 	public int terrainLength = 5000; //defines the length of the terrain in meters
-	private int[,] colorMap;
 	[Tooltip("The image used for making the world")]
 	public Texture2D tex;
-	private float[, ] pixelDistances;
-	private Boolean[, ] fieldEdgeTypes;
-	SplatPrototype[] terrainTexs;
 	[Tooltip("Textures placed on the terrain")]
 	public Texture2D[] textureList;
 	[Tooltip("height of water section in meters")]
@@ -31,8 +36,6 @@ public class GenCity : MonoBehaviour
 	public int fieldHeight = 40;
 	[Tooltip("height of mountain section in meters")]
 	public int mountainHeight = 1500;
-	private float waterSpace;
-	private float fieldSpace;
 	[Tooltip("height of top half of field section in meters, unused currently")]
 	public float topHalfField = 20f;
 	[Tooltip("height of bottom half field section in meters, unused currently")]
@@ -45,10 +48,6 @@ public class GenCity : MonoBehaviour
 	public int grassSize = 2048;
 	[Tooltip("Image that can be used for City Creation")]
 	public Texture2D cityTex;
-
-	//important note:
-	//boundary of map defined by:
-	//!((k+y) < 0 || (k + y) > (length-1) || (z + x) < 0 || (z + x) > (width-1))
 	
 	enum ground : int
 	{

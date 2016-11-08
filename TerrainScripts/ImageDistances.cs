@@ -15,7 +15,7 @@ public class ImageDistances
 
 	public void setColors (Texture2D tex, int width, int length, float[,] pixelDistances, int[,] colorMap, bool[,] fieldEdgeTypes)
 	{
-		//GetPixel is not efficient. This method could run 100X faster if I replace that with GetPixels or GetPixels32 or whatever I need.
+		//GetPixel is not efficient. This method could run faster if I replace that with GetPixels or GetPixels32 or whatever I need.
 
 		int imageLoopX = tex.width;
 		int imageLoopY = tex.height;
