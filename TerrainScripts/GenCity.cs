@@ -76,7 +76,6 @@ public class GenCity : MonoBehaviour
 
 		fieldEdgeTypes = new Boolean[width, length];
 
-		//tex = Resources.Load ("InputPictureG") as Texture2D;
 		cityTex = Resources.Load ("EserimCities") as Texture2D;
 
 		textureList = new Texture2D[3];
