@@ -29,7 +29,7 @@ public class GrassCreator
 				// Calculate the steepness of the terrain
 				float steepness = terrainData.GetSteepness(y_01,x_01);
 
-				if (height > waterTop && height < fieldTop && steepness < 20f && colorMap[i*2, j*2] != cityGround) {
+				if (height > waterTop && height < fieldTop && steepness < 24f && colorMap[i*2, j*2] != cityGround) {
 					map [i, j] = 16;
 				}
 			}

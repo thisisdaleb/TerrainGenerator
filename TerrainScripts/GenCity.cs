@@ -48,7 +48,9 @@ public class GenCity : MonoBehaviour
 	public int grassSize = 2048;
 	[Tooltip("Image that can be used for City Creation")]
 	public Texture2D cityTex;
-	
+
+
+	//defines the types of ground states that each point on the map can be
 	enum ground : int
 	{
 		Field,
@@ -64,6 +66,8 @@ public class GenCity : MonoBehaviour
 		refreshVariables ();
 	}
 
+	//re-initialized all variables
+	//allows the program to be run multile times from the same script
 	void refreshVariables ()
 	{
 		length = width;
@@ -91,22 +95,30 @@ public class GenCity : MonoBehaviour
 	// Update is called once per frame
 	void Update ()
 	{
-		if (runNow && !(tex == null)) {
+		//if the run button has been checked and there is a texture loaded 
+		if (runNow && tex != null) {
 			convertInputIntoMap ();
-		}
-		else {
 			refreshVariables();
 		}
 	}
 	
 	void convertInputIntoMap ()
 	{
-		print ("Start running processor melting program.");
+		//
+		//yPlaced = length / tex.height
+		//while (loopY < imageLoopY) {
+		//while (placeY < yPlaced) {
+		//(yPlaced * loopY) + placeY
+		print ("4097 Start running processor melting program. " + ( ((length/tex.height) * (tex.height-1)) + (length/tex.height) - 1)   );
 		runNow = false;
-		
+
+		//creates matrix of all field types
+		//creates matrix of distances from each pixel to another pixel of a different field type
+		//marks down which field type that pixel is closest to, and the number itself
 		ImageDistances setImage = new ImageDistances ();
 		setImage.setColors (tex, width, length, pixelDistances, colorMap, fieldEdgeTypes);
 
+		//sets all the corner pixels to 0 to fix issue where corners are large spikes.
 		pixelDistances [0, 0] = 0;
 		pixelDistances [pixelDistances.GetLength (0) - 1, 0] = 0;
 		pixelDistances [0, pixelDistances.GetLength (0) - 1] = 0;
@@ -116,12 +128,12 @@ public class GenCity : MonoBehaviour
 		//integer value is normalized to 0.0f and the maximum value is at 1.0f
 		createFloatMatrix ();
 
-		addBuildings ();
+		//if the city texture exists, use it to find all buildings on map and place them into the world
+		if(cityTex != null)
+			addBuildings ();
 
 		//Create terrain and send it through the world
 		createTerrain ();
-
-		refreshVariables ();
 	}
 	
 	private void createFloatMatrix ()

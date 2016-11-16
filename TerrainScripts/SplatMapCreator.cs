@@ -71,7 +71,7 @@ public class SplatMapCreator {
 					splatWeights[2] = 0f;
 				}
 				//snow
-				if(height > 0.9f){
+				if(height > 0.8f){
 					splatWeights[0] = 0f;
 					splatWeights [1] = 0f; 
 					splatWeights[2] = 1f;

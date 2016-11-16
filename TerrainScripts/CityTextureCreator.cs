@@ -21,15 +21,18 @@ public class CityTextureCreator
 		int placeX = 0;
 		int placeY = 0;
 
+		//1D array of colors of all pixels of texture
 		Color[] texColor1D = tex.GetPixels ();
-
+		//matrix of colors of texture
 		Color[,] texColors = new Color[imageLoopX, imageLoopY];
 
+		//loops horizontally and vertically through texture
 		for(int Cy = 0; Cy < imageLoopY; Cy++)
 		{
 			for(int Cx = 0; Cx < imageLoopX; Cx++)
 			{
-				texColors [Cx, Cy] = texColor1D[(Cy*imageLoopY)+Cx];
+				//pulls 1D array into matrix
+				texColors [Cx, Cy] = texColor1D[(Cy*imageLoopX)+Cx];
 			}
 		}
 
