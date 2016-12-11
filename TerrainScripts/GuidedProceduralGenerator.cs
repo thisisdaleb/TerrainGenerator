@@ -8,7 +8,7 @@ public class GuidedProceduralGenerator : MonoBehaviour
 {
 	//THIS IS THE CURRENT MAIN PROGRAM FOR GENERATING WORLDS BY INPUT IMAGE
 
-	private int width = 4097; 				//These 2 defined by input! Each terrain 4097 pixels wide and long
+	private int width = 4097;				//These 2 defined by input! Each terrain 4097 pixels wide and long
 	private int length;
 	private float[,] finalHeightMap;		//defines the elevation of each height point between 0.0 and 1.0
 	private int terrainHeight = 2400;		//defines the maximum possible height of the terrain
@@ -20,31 +20,31 @@ public class GuidedProceduralGenerator : MonoBehaviour
 	private float fieldSpace;				//percentage of map height used by field
 
 	//public values that users can edit in GUI.
-	[Tooltip("Checking this box starts the system")]
+	[Tooltip ("Checking this box starts the system")]
 	public bool runNow;
-	[Tooltip("The width in meters of the terrain")]
+	[Tooltip ("The width in meters of the terrain")]
 	public int terrainWidthInMeters = 7000;
-	[Tooltip("The length in meters of the terrain")]
+	[Tooltip ("The length in meters of the terrain")]
 	public int terrainLengthInMeters = 5000;
-	[Tooltip("The image used for making the world")]
+	[Tooltip ("The image used for making the world")]
 	public Texture2D tex;
-	[Tooltip("Textures placed on the terrain")]
+	[Tooltip ("Textures placed on the terrain")]
 	public Texture2D[] textureList;
-	[Tooltip("height of water section in meters")]
+	[Tooltip ("height of water section in meters")]
 	public int waterHeight = 350;
-	[Tooltip("height of field section in meters")]
+	[Tooltip ("height of field section in meters")]
 	public int fieldHeight = 40;
-	[Tooltip("height of mountain section in meters")]
+	[Tooltip ("height of mountain section in meters")]
 	public int mountainHeight = 1500;
-	[Tooltip("height of top half of field section in meters, unused currently")]
+	[Tooltip ("height of top half of field section in meters, unused currently")]
 	public float topHalfField = 20f;
-	[Tooltip("height of bottom half field section in meters, unused currently")]
+	[Tooltip ("height of bottom half field section in meters, unused currently")]
 	public float bottomHalfField = 20f;
-	[Tooltip("How many pixels out does the top half of fields use?")]
+	[Tooltip ("How many pixels out does the top half of fields use?")]
 	public float topFieldLength = 50f;
-	[Tooltip("How many pixels out does the bottom half of fields use?")]
+	[Tooltip ("How many pixels out does the bottom half of fields use?")]
 	public float bottomFieldLength = 50f;
-	[Tooltip("Detail resolution of the map (ie amount of grass)")]
+	[Tooltip ("Detail resolution of the map (ie amount of grass)")]
 	public int detailResolution = 2048;
 
 
@@ -54,17 +54,14 @@ public class GuidedProceduralGenerator : MonoBehaviour
 		Field,
 		Mountain,
 		Water,
-		City 
-	}
-	;
+		City
+	};
 
-	// Use this for initialization
 	void Start ()
 	{
 		refreshVariables ();
 	}
 
-	//re-initialized all variables
 	//allows the program to be run multiple times from the same script
 	void refreshVariables ()
 	{
@@ -86,10 +83,10 @@ public class GuidedProceduralGenerator : MonoBehaviour
 	// Update is called once per frame
 	void Update ()
 	{
-		//if the run button has been checked and there is a texture loaded 
+		//if the run button has been checked and there is a map image loaded 
 		if (runNow && tex != null) {
 			convertInputIntoMap ();
-			refreshVariables();
+			refreshVariables ();
 		}
 	}
 
@@ -103,70 +100,59 @@ public class GuidedProceduralGenerator : MonoBehaviour
 		ImageDistances setImage = new ImageDistances ();
 		setImage.setColors (tex, width, length, pixelDistances, colorMap, fieldEdgeTypes);
 		setImage.setDistances (pixelDistances, colorMap, fieldEdgeTypes);
+		setImage.removeCornerPillars (pixelDistances);
 
-		//sets all the corner pixels to 0 to fix issue where corners are large spikes.
-		removeCornerPillars ();
-
-		//create matrix of floats, set to the integer matrix where the minimum
-		//integer value is normalized to 0.0f and the maximum value is at 1.0f
+		//Now that we know the distances to a different field type for each pixel,
+		//we can finish up by creating the height map matrix
 		createFloatMatrix ();
-		setMin ();
-		smoothHeightMapPixels ();
-		smoothHeightMapPixels ();
-		smoothHeightMapPixels ();
-		addNoise();
-
-		//Create terrain and send it through the world
+		setAllHeightPointsToBeBetweenZeroAndOne ();
+		for (int smooth = 0; smooth < 3; smooth++) {
+			smoothHeightMapPixels ();
+		}
+		addNoise ();
 		createTerrain ();
-	}
-
-	private void removeCornerPillars ()
-	{
-		pixelDistances [0, 0] = 0;
-		pixelDistances [pixelDistances.GetLength (0) - 1, 0] = 0;
-		pixelDistances [0, pixelDistances.GetLength (0) - 1] = 0;
-		pixelDistances [pixelDistances.GetLength (0) - 1, pixelDistances.GetLength (0) - 1] = 0;
 	}
 
 	private void createFloatMatrix ()
 	{
-		for (int y = 0; y < length-1; y++) {
-			for (int x = 0; x < width-1; x++) {
+		for (int y = 0; y < length - 1; y++) {
+			for (int x = 0; x < width - 1; x++) {
 				createInitialHeightMapMatrixValues (y, x);
 			}
 		}
 	}
 
-	private void createInitialHeightMapMatrixValues(int y, int x){
+	private void createInitialHeightMapMatrixValues (int y, int x)
+	{
 		if (colorMap [y, x] == (int)ground.Mountain) {
-			finalHeightMap [y, x] = 0.0f + (float)(pixelDistances [y, x]-1) * 0.02f;
+			finalHeightMap [y, x] = 0.0f + (float)(pixelDistances [y, x] - 1) * 0.02f;
 
 		} else if (colorMap [y, x] == (int)ground.Water) {
-			finalHeightMap [y, x] = 0.0f + (float)(pixelDistances [y, x]-1) * 0.02f;
+			finalHeightMap [y, x] = 0.0f + (float)(pixelDistances [y, x] - 1) * 0.02f;
 		} 
 		//CITIES AND FIELDS
 		else { 
 			//if city, make it so it pretends that area is near water.
 			if (colorMap [y, x] == (int)ground.City && pixelDistances [y, x] > 6)
-				fieldEdgeTypes[y, x] = false;
+				fieldEdgeTypes [y, x] = false;
 			if (fieldEdgeTypes [y, x] == true) {
 				if (pixelDistances [y, x] < topFieldLength + 1)
-					finalHeightMap [y, x] = 0.6f + smoothInterpolate (topFieldLength, 0f, pixelDistances [y, x] / topFieldLength) /topFieldLength * 0.4f;
+					finalHeightMap [y, x] = 0.6f + smoothInterpolate (topFieldLength, 0f, pixelDistances [y, x] / topFieldLength) / topFieldLength * 0.4f;
 				//the last decimal number is how much of the field height this should take up.
 				else
 					finalHeightMap [y, x] = 0.6f;
 				//this needs to be equal to that last number
 			} else {
-				if (pixelDistances [y, x] < bottomFieldLength+1) 
+				if (pixelDistances [y, x] < bottomFieldLength + 1)
 					finalHeightMap [y, x] = 0.0f + smoothInterpolate (0f, 
-						bottomFieldLength, pixelDistances [y, x] / bottomFieldLength) / bottomFieldLength *0.6f;
+						bottomFieldLength, pixelDistances [y, x] / bottomFieldLength) / bottomFieldLength * 0.6f;
 				else
 					finalHeightMap [y, x] = 0.6f;
 			}
 		}
 	}
 
-	private void setMin ()
+	private void setAllHeightPointsToBeBetweenZeroAndOne ()
 	{
 		float fieldMin = 20f;
 		float fieldMax = -20f;
@@ -176,38 +162,21 @@ public class GuidedProceduralGenerator : MonoBehaviour
 		float waterMax = -20f;
 		length = width = finalHeightMap.GetLength (0);
 
-		for (int y = 0; y < length-1; y++) {
-			for (int x = 0; x < width-1; x++) {
+		for (int y = 0; y < length - 1; y++) {
+			for (int x = 0; x < width - 1; x++) {
 				if (colorMap [y, x] == (int)ground.Water) {
-					if (finalHeightMap [y, x] < waterMin) {
-						waterMin = finalHeightMap [y, x];
-					}
-					if (finalHeightMap [y, x] > waterMax) {
-						waterMax = finalHeightMap [y, x];
-					}
-				}
-				else if (colorMap [y, x] == (int)ground.Mountain) {
-					if (finalHeightMap [y, x] < mountainMin) {
-						mountainMin = finalHeightMap [y, x];
-					}
-					if (finalHeightMap [y, x] > mountainMax) {
-						mountainMax = finalHeightMap [y, x];
-					}
-				}
-				else{
-					if (finalHeightMap [y, x] < fieldMin) {
-						fieldMin = finalHeightMap [y, x];
-					}
-					if (finalHeightMap [y, x] > fieldMax) {
-						fieldMax = finalHeightMap [y, x];
-					}
+					setGroundMinMax (ref waterMin, ref waterMax, y, x);
+				} else if (colorMap [y, x] == (int)ground.Mountain) {
+					setGroundMinMax (ref mountainMin, ref mountainMax, y, x);
+				} else {
+					setGroundMinMax (ref fieldMin, ref fieldMax, y, x);
 				}
 			}
 		}
 
-		waterMin = Math.Abs (waterMin); 
-		mountainMin = Math.Abs (mountainMin); 
-		fieldMin = Math.Abs (fieldMin); 
+		waterMin = Math.Abs (waterMin);
+		mountainMin = Math.Abs (mountainMin);
+		fieldMin = Math.Abs (fieldMin);
 
 		terrainHeight = waterHeight + mountainHeight + fieldHeight;
 
@@ -215,45 +184,56 @@ public class GuidedProceduralGenerator : MonoBehaviour
 		float mountainSpace = (float)(mountainHeight) / (float)(terrainHeight);
 		fieldSpace = (float)(fieldHeight) / (float)(terrainHeight);
 
-		for (int y = 0; y < length-1; y++) {
-			for (int x = 0; x < width-1; x++) {
+		for (int y = 0; y < length - 1; y++) {
+			for (int x = 0; x < width - 1; x++) {
 				if (colorMap [y, x] == (int)ground.Water) {
-					finalHeightMap [y, x] = waterSpace - ((finalHeightMap [y, x] + waterMin) / (waterMax + waterMin))*waterSpace;
-				}
-				else if (colorMap [y, x] == (int)ground.Mountain) {
-					finalHeightMap [y, x] = waterSpace + fieldSpace + ((finalHeightMap [y, x] + mountainMin) / (mountainMax + mountainMin))*mountainSpace;
-				}
-				else{
-					finalHeightMap [y, x] = waterSpace + ((finalHeightMap [y, x] + fieldMin) / (fieldMax + fieldMin))*fieldSpace;
+					finalHeightMap [y, x] = waterSpace - ((finalHeightMap [y, x] + waterMin) / (waterMax + waterMin)) * waterSpace;
+				} else if (colorMap [y, x] == (int)ground.Mountain) {
+					finalHeightMap [y, x] = waterSpace + fieldSpace + ((finalHeightMap [y, x] + mountainMin) / (mountainMax + mountainMin)) * mountainSpace;
+				} else {
+					finalHeightMap [y, x] = waterSpace + ((finalHeightMap [y, x] + fieldMin) / (fieldMax + fieldMin)) * fieldSpace;
 				}
 			}
 		}
 	}
 
-	private void smoothHeightMapPixels (){
+	private void setGroundMinMax(ref float groundMin, ref float groundMax, int y, int x){
+		if (finalHeightMap [y, x] < groundMin) {
+			groundMin = finalHeightMap [y, x];
+		}
+		if (finalHeightMap [y, x] > groundMax) {
+			groundMax = finalHeightMap [y, x];
+		}
+	}
+
+
+
+	private void smoothHeightMapPixels ()
+	{
 		float[, ] newFinalHeightMap = new float[width, length];
-		for (int y = 1; y < length-2; y++) {
-			for (int x = 1; x < width-2; x++) {
+		for (int y = 1; y < length - 2; y++) {
+			for (int x = 1; x < width - 2; x++) {
 				newFinalHeightMap [y, x] = averagePixelCalculation (y, x);
 			}
 		}
 		finalHeightMap = newFinalHeightMap;
 	}
 
-	private float averagePixelCalculation(int y, int x){
+	private float averagePixelCalculation (int y, int x)
+	{
 		float averagePixel = 0;
-		averagePixel += finalHeightMap [y, x] *0.25f;
+		averagePixel += finalHeightMap [y, x] * 0.25f;
 		averagePixel +=	
 			(
-			finalHeightMap [y-1, x]+
-			finalHeightMap [y+1, x]+
-			finalHeightMap [y-1, x-1]+
-			finalHeightMap [y, x-1]+
-			finalHeightMap [y+1, x-1]+
-			finalHeightMap [y-1, x+1]+
-			finalHeightMap [y, x+1]+
-			finalHeightMap [y+1, x+1]
-			)/8f * 0.75f;
+		    finalHeightMap [y - 1, x] +
+		    finalHeightMap [y + 1, x] +
+		    finalHeightMap [y - 1, x - 1] +
+		    finalHeightMap [y, x - 1] +
+		    finalHeightMap [y + 1, x - 1] +
+		    finalHeightMap [y - 1, x + 1] +
+		    finalHeightMap [y, x + 1] +
+		    finalHeightMap [y + 1, x + 1]
+		) / 8f * 0.75f;
 		return averagePixel;
 	}
 
@@ -264,12 +244,9 @@ public class GuidedProceduralGenerator : MonoBehaviour
 			for (int x = 1; x < width - 2; x++) {
 				if (colorMap [y, x] == (int)ground.Mountain && pixelDistances [y, x] > 1)
 					finalHeightMap [y, x] += (float)(rand.NextDouble () * 0.001f);
-				else if (colorMap [y, x] == (int)ground.Field && (fieldEdgeTypes [y, x] || pixelDistances [y, x] > 2)) 
-				{
+				else if (colorMap [y, x] == (int)ground.Field && (fieldEdgeTypes [y, x] || pixelDistances [y, x] > 2)) {
 					finalHeightMap [y, x] += (float)(rand.NextDouble () * 0.0003f);
-				}
-				else if (colorMap [y, x] == (int)ground.City)
-				{
+				} else if (colorMap [y, x] == (int)ground.City) {
 					finalHeightMap [y, x] += (float)(rand.NextDouble () * 0.0002f);
 				}
 			}
@@ -288,10 +265,10 @@ public class GuidedProceduralGenerator : MonoBehaviour
 	private void placeTextures (TerrainData terrainData)
 	{
 		SplatMapCreator spatMapper = new SplatMapCreator ();
-		if(terrainTexs.Length>3)
-			spatMapper.startTerrainPlacing (terrainData, true, waterSpace, (waterSpace+fieldSpace), colorMap, (int)ground.City);
+		if (terrainTexs.Length > 3)
+			spatMapper.startTerrainPlacing (terrainData, true, waterSpace, (waterSpace + fieldSpace), colorMap, (int)ground.City);
 		else
-			spatMapper.startTerrainPlacing (terrainData, false, waterSpace, (waterSpace+fieldSpace), colorMap, (int)ground.City);
+			spatMapper.startTerrainPlacing (terrainData, false, waterSpace, (waterSpace + fieldSpace), colorMap, (int)ground.City);
 	}
 
 	private void createGrass (TerrainData terrainData)
@@ -311,7 +288,7 @@ public class GuidedProceduralGenerator : MonoBehaviour
 	private void placeGrass (TerrainData terrainData)
 	{
 		GrassCreator grassMap = new GrassCreator ();
-		grassMap.startGrassPlacing (terrainData, colorMap, detailResolution, 8, waterSpace, (waterSpace+fieldSpace), (int) ground.City);
+		grassMap.startGrassPlacing (terrainData, colorMap, detailResolution, 8, waterSpace, (waterSpace + fieldSpace), (int)ground.City);
 	}
 
 	private void createTerrain ()
@@ -319,8 +296,8 @@ public class GuidedProceduralGenerator : MonoBehaviour
 		TerrainData terrainData = new TerrainData ();
 
 		terrainData.heightmapResolution = width;
-		terrainData.baseMapResolution = width-1;
-		terrainData.alphamapResolution = width-1;
+		terrainData.baseMapResolution = width - 1;
+		terrainData.alphamapResolution = width - 1;
 
 		terrainData.SetHeights (0, 0, finalHeightMap);
 		terrainData.size = new Vector3 (terrainWidthInMeters, terrainHeight, terrainLengthInMeters);

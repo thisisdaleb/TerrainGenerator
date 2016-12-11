@@ -145,4 +145,14 @@ public class ImageDistances
 		}
 	}
 
+	//sets all the corner pixels to 0 to fix issue where corners are large spikes.
+	//This is a workaround for some sort of bug
+	public void removeCornerPillars (float[,] pixelDistances)
+	{
+		pixelDistances [0, 0] = 0;
+		pixelDistances [pixelDistances.GetLength (0) - 1, 0] = 0;
+		pixelDistances [0, pixelDistances.GetLength (0) - 1] = 0;
+		pixelDistances [pixelDistances.GetLength (0) - 1, pixelDistances.GetLength (0) - 1] = 0;
+	}
+
 }
