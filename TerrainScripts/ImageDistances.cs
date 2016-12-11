@@ -67,11 +67,9 @@ public class ImageDistances
 			loopX = 0;
 			loopY++;
 		}
-
-		setDistances (pixelDistances, colorMap, fieldEdgeTypes);
 	}
 
-	private void setDistances (float[,] pixelDistances, int[,] colorMap, bool[,] fieldEdgeTypes)
+	public void setDistances (float[,] pixelDistances, int[,] colorMap, bool[,] fieldEdgeTypes)
 	{
 		for (int y = 0; y < pixelDistances.GetLength (0); y++) {
 			for (int x = 0; x < pixelDistances.GetLength (1); x++) {
@@ -105,15 +103,6 @@ public class ImageDistances
 				fieldDistance (y, x, 1, 0, false, pixelDistances, colorMap, fieldEdgeTypes);
 			}
 		}
-
-		for (int y = 0; y < pixelDistances.GetLength (0); y++) {
-			for (int x = 0; x < pixelDistances.GetLength (1); x++) {
-				pixelTypeDistance (y, x, 0, -1, (int)ground.Mountain, false, pixelDistances, colorMap, fieldEdgeTypes);
-				pixelTypeDistance (y, x, 0, -1, (int)ground.Water, false, pixelDistances, colorMap, fieldEdgeTypes);
-				fieldDistance (y, x, 0, -1, false, pixelDistances, colorMap, fieldEdgeTypes);
-			}
-		}
-
 	}
 
 	private void pixelTypeDistance (int y, int x, int movingY, int movingX, int groundType, bool firstRun, 
