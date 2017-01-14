@@ -41,9 +41,9 @@ public class GuidedProceduralGenerator : MonoBehaviour
 	[Tooltip ("height of bottom half field section in meters, unused currently")]
 	public float bottomHalfField = 20f;
 	[Tooltip ("How many pixels out does the top half of fields use?")]
-	public float topFieldLength = 50f;
+	public float topFieldLength = 75f;
 	[Tooltip ("How many pixels out does the bottom half of fields use?")]
-	public float bottomFieldLength = 50f;
+	public float bottomFieldLength = 100f;
 	[Tooltip ("Detail resolution of the map (ie amount of grass)")]
 	public int detailResolution = 2048;
 

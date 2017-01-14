@@ -71,6 +71,55 @@ public class ImageDistances
 
 	public void setDistances (float[,] pixelDistances, int[,] colorMap, bool[,] fieldEdgeTypes)
 	{
+		/*
+		for (int y = 0; y < pixelDistances.GetLength (0); y++) {
+			for (int x = 0; x < pixelDistances.GetLength (1); x++) {
+				//upleft
+				pixelTypeDistance (y, x, -1, -1, (int)ground.Mountain, true, pixelDistances, colorMap, fieldEdgeTypes);
+				pixelTypeDistance (y, x, -1, -1, (int)ground.Water, true, pixelDistances, colorMap, fieldEdgeTypes);
+				pixelTypeDistance (y, x, -1, -1, (int)ground.City, true, pixelDistances, colorMap, fieldEdgeTypes);
+				fieldDistance (y, x, -1, -1, true, pixelDistances, colorMap, fieldEdgeTypes);
+				//up
+				pixelTypeDistance (y, x, -1, 0, (int)ground.Mountain, false, pixelDistances, colorMap, fieldEdgeTypes);
+				pixelTypeDistance (y, x, -1, 0, (int)ground.Water, false, pixelDistances, colorMap, fieldEdgeTypes);
+				pixelTypeDistance (y, x, -1, 0, (int)ground.City, false, pixelDistances, colorMap, fieldEdgeTypes);
+				fieldDistance (y, x, -1, 0, false, pixelDistances, colorMap, fieldEdgeTypes);
+				//upright
+				pixelTypeDistance (y, x, -1, 1, (int)ground.Mountain, false, pixelDistances, colorMap, fieldEdgeTypes);
+				pixelTypeDistance (y, x, -1, 1, (int)ground.Water, false, pixelDistances, colorMap, fieldEdgeTypes);
+				pixelTypeDistance (y, x, -1, 1, (int)ground.City, false, pixelDistances, colorMap, fieldEdgeTypes);
+				fieldDistance (y, x, -1, 1, false, pixelDistances, colorMap, fieldEdgeTypes);
+				//left
+				pixelTypeDistance (y, x, 0, -1, (int)ground.Mountain, false, pixelDistances, colorMap, fieldEdgeTypes);
+				pixelTypeDistance (y, x, 0, -1, (int)ground.Water, false, pixelDistances, colorMap, fieldEdgeTypes);
+				pixelTypeDistance (y, x, 0, -1, (int)ground.City, false, pixelDistances, colorMap, fieldEdgeTypes);
+				fieldDistance (y, x, 0, -1, false, pixelDistances, colorMap, fieldEdgeTypes);
+			}
+		}
+
+		for (int y = pixelDistances.GetLength (0) - 1; y >= 0; y--) {
+			for (int x = pixelDistances.GetLength (1) - 1; x >= 0; x--) {
+				//bottomright
+				pixelTypeDistance (y, x, 1, 1, (int)ground.Mountain, false, pixelDistances, colorMap, fieldEdgeTypes);
+				pixelTypeDistance (y, x, 1, 1, (int)ground.Water, false, pixelDistances, colorMap, fieldEdgeTypes);
+				fieldDistance (y, x, 1, 1, false, pixelDistances, colorMap, fieldEdgeTypes);
+				//bottom
+				pixelTypeDistance (y, x, 1, 0, (int)ground.Mountain, false, pixelDistances, colorMap, fieldEdgeTypes);
+				pixelTypeDistance (y, x, 1, 0, (int)ground.Water, false, pixelDistances, colorMap, fieldEdgeTypes);
+				fieldDistance (y, x, 1, 0, false, pixelDistances, colorMap, fieldEdgeTypes);
+				//bottomleft
+				pixelTypeDistance (y, x, 1, -1, (int)ground.Mountain, false, pixelDistances, colorMap, fieldEdgeTypes);
+				pixelTypeDistance (y, x, 1, -1, (int)ground.Water, false, pixelDistances, colorMap, fieldEdgeTypes);
+				fieldDistance (y, x, 1, -1, false, pixelDistances, colorMap, fieldEdgeTypes);
+				//right
+				pixelTypeDistance (y, x, 0, 1, (int)ground.Mountain, false, pixelDistances, colorMap, fieldEdgeTypes);
+				pixelTypeDistance (y, x, 0, 1, (int)ground.Water, false, pixelDistances, colorMap, fieldEdgeTypes);
+				fieldDistance (y, x, 0, 1, false, pixelDistances, colorMap, fieldEdgeTypes);
+			}
+		}
+		*/
+
+
 		for (int y = 0; y < pixelDistances.GetLength (0); y++) {
 			for (int x = 0; x < pixelDistances.GetLength (1); x++) {
 				pixelTypeDistance (y, x, 0, -1, (int)ground.Mountain, true, pixelDistances, colorMap, fieldEdgeTypes);
