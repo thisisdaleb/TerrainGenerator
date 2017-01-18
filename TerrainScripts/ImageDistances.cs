@@ -4,6 +4,8 @@ using System.Collections;
 public class ImageDistances
 {
 
+	int[,] xChange, yChange;
+
 	enum ground : int
 	{
 		Field,
@@ -14,6 +16,11 @@ public class ImageDistances
 
 	public void setColors (Texture2D tex, int width, int length, float[,] pixelDistances, int[,] colorMap, bool[,] fieldEdgeTypes)
 	{
+
+		xChange = yChange = new int[colorMap.GetLength(0), colorMap.GetLength(1)];
+		//Will use to calculate perfect distances. Everytime a pixel is one to the left, set xChange to the comparing pixel's
+		// xChange - 1. if to the right, +1. If comparing pixel above, -1 to yChange, comparing pixel below, +1.
+		//Then you calculate pythagorean theorem for every single cell.
 
 		int imageLoopX = tex.width;
 		int imageLoopY = tex.height;
