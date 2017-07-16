@@ -8,22 +8,25 @@ public class GuidedProceduralGenerator : MonoBehaviour
 {
 	//THIS IS THE CURRENT MAIN PROGRAM FOR GENERATING WORLDS BY INPUT IMAGE
 
-	private int width = 4097;				//These 2 defined by input! Each terrain 4097 pixels wide and long
+	private int width = 2049;				//These 2 defined by input! Each terrain 4097 pixels wide and long
 	private int length;
 	private float[,] finalHeightMap;		//defines the elevation of each height point between 0.0 and 1.0
 	private int terrainHeight = 2400;		//defines the maximum possible height of the terrain
 	private int[,] colorMap;				//the terrain type of each pixel
 	private float[, ] pixelDistances;		//the distance from each pixel to a pixel of a different color
-	private Boolean[, ] fieldEdgeTypes;		//tells field pixels whether they are closest to mountains or water
+	private int[, ] fieldEdgeTypes;		//tells field pixels whether they are closest to mountains or water
 	private SplatPrototype[] terrainTexs;	//set of textures used by map
 	private float waterSpace;				//percentage of map height used by water
 	private float fieldSpace;				//percentage of map height used by field
 
+
 	//public values that users can edit in GUI.
 	[Tooltip ("Checking this box starts the system")]
 	public bool runNow;
+	[Tooltip ("Checking this box uses Euclidean distance instead of manhatten")]
+	public bool Euclidean;
 	[Tooltip ("The width in meters of the terrain")]
-	public int terrainWidthInMeters = 7000;
+	public int terrainWidthInMeters = 5000;
 	[Tooltip ("The length in meters of the terrain")]
 	public int terrainLengthInMeters = 5000;
 	[Tooltip ("The image used for making the world")]
@@ -70,7 +73,7 @@ public class GuidedProceduralGenerator : MonoBehaviour
 		length = width;
 		colorMap = new int[width, length];
 		pixelDistances = new float[width, length];
-		fieldEdgeTypes = new Boolean[width, length];
+		fieldEdgeTypes = new int[width, length];
 		finalHeightMap = new float[length, width];
 
 		textureList = new Texture2D[3];
@@ -98,18 +101,21 @@ public class GuidedProceduralGenerator : MonoBehaviour
 		//creates matrix of distances from each pixel to another pixel of a different field type
 		//marks down which field type that pixel is closest to, and the number itself
 		ImageDistances setImage = new ImageDistances ();
-		setImage.setColors (tex, width, length, pixelDistances, colorMap, fieldEdgeTypes);
-		setImage.setDistances (pixelDistances, colorMap, fieldEdgeTypes);
+		setImage.setColors (tex, width, length, pixelDistances, colorMap);
+		if(Euclidean)
+			setImage.setDistancesEuclidean (pixelDistances, colorMap, fieldEdgeTypes);
+		else
+			setImage.setDistances (pixelDistances, colorMap, fieldEdgeTypes);
 		setImage.removeCornerPillars (pixelDistances);
 
 		//Now that we know the distances to a different field type for each pixel,
 		//we can finish up by creating the height map matrix
 		createFloatMatrix ();
 		setAllHeightPointsToBeBetweenZeroAndOne ();
-		for (int smooth = 0; smooth < 3; smooth++) {
-			smoothHeightMapPixels ();
+		for (int smooth = 1; smooth < 3; smooth++) {
+			//smoothHeightMapPixels (smooth);
 		}
-		addNoise ();
+		//addNoise ();
 		createTerrain ();
 	}
 
@@ -134,8 +140,8 @@ public class GuidedProceduralGenerator : MonoBehaviour
 		else { 
 			//if city, make it so it pretends that area is near water.
 			if (colorMap [y, x] == (int)ground.City && pixelDistances [y, x] > 6)
-				fieldEdgeTypes [y, x] = false;
-			if (fieldEdgeTypes [y, x] == true) {
+				fieldEdgeTypes [y, x] = (int)ground.Water;
+			if (fieldEdgeTypes [y, x] == (int)ground.Mountain) {
 				if (pixelDistances [y, x] < topFieldLength + 1)
 					finalHeightMap [y, x] = 0.6f + smoothInterpolate (topFieldLength, 0f, pixelDistances [y, x] / topFieldLength) / topFieldLength * 0.4f;
 				//the last decimal number is how much of the field height this should take up.
@@ -208,31 +214,31 @@ public class GuidedProceduralGenerator : MonoBehaviour
 
 
 
-	private void smoothHeightMapPixels ()
+	private void smoothHeightMapPixels (int k)
 	{
 		float[, ] newFinalHeightMap = new float[width, length];
-		for (int y = 1; y < length - 2; y++) {
-			for (int x = 1; x < width - 2; x++) {
-				newFinalHeightMap [y, x] = averagePixelCalculation (y, x);
+		for (int y = k; y < length - 2 - k; y++) {
+			for (int x = k; x < width - 2 - k; x++) {
+				newFinalHeightMap [y, x] = averagePixelCalculation (y, x, k);
 			}
 		}
 		finalHeightMap = newFinalHeightMap;
 	}
 
-	private float averagePixelCalculation (int y, int x)
+	private float averagePixelCalculation (int y, int x, int k)
 	{
 		float averagePixel = 0;
 		averagePixel += finalHeightMap [y, x] * 0.25f;
 		averagePixel +=	
 			(
-		    finalHeightMap [y - 1, x] +
-		    finalHeightMap [y + 1, x] +
-		    finalHeightMap [y - 1, x - 1] +
-		    finalHeightMap [y, x - 1] +
-		    finalHeightMap [y + 1, x - 1] +
-		    finalHeightMap [y - 1, x + 1] +
-		    finalHeightMap [y, x + 1] +
-		    finalHeightMap [y + 1, x + 1]
+		    finalHeightMap [y - k, x] +
+		    finalHeightMap [y + k, x] +
+		    finalHeightMap [y - k, x - k] +
+		    finalHeightMap [y, x - k] +
+		    finalHeightMap [y + k, x - k] +
+		    finalHeightMap [y - k, x + k] +
+		    finalHeightMap [y, x + k] +
+		    finalHeightMap [y + k, x + k]
 		) / 8f * 0.75f;
 		return averagePixel;
 	}
@@ -244,7 +250,7 @@ public class GuidedProceduralGenerator : MonoBehaviour
 			for (int x = 1; x < width - 2; x++) {
 				if (colorMap [y, x] == (int)ground.Mountain && pixelDistances [y, x] > 1)
 					finalHeightMap [y, x] += (float)(rand.NextDouble () * 0.001f);
-				else if (colorMap [y, x] == (int)ground.Field && (fieldEdgeTypes [y, x] || pixelDistances [y, x] > 2)) {
+				else if (colorMap [y, x] == (int)ground.Field && (fieldEdgeTypes [y, x]== (int)ground.Mountain && pixelDistances [y, x] > 2)) {
 					finalHeightMap [y, x] += (float)(rand.NextDouble () * 0.0003f);
 				} else if (colorMap [y, x] == (int)ground.City) {
 					finalHeightMap [y, x] += (float)(rand.NextDouble () * 0.0002f);

@@ -77,7 +77,7 @@ public class SplatMapCreator {
 					splatWeights[2] = 1f;
 				}
 				//city
-				if (colorMap [x*2, y*2] == ground) {
+				if (colorMap [x*(terrainData.alphamapHeight/ colorMap.GetLength(0)), y*(terrainData.alphamapHeight/ colorMap.GetLength(0))] == ground) {
 					splatWeights[0] = 0f;
 					splatWeights[1] = 1f;
 					splatWeights[2] = 0f;
