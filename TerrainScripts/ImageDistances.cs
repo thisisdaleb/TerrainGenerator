@@ -79,33 +79,43 @@ public class ImageDistances
 	public void setDistances (float[,] pixelDistances, int[,] colorMap, int[,] fieldEdgeTypes)
 	{
 		Debug.Log ("Manhatten Distance");
+
 		for (int y = 0; y < pixelDistances.GetLength (0); y++) {
 			for (int x = 0; x < pixelDistances.GetLength (1); x++) {
 				fieldDistance (y, x, 0, -1, true, pixelDistances, colorMap, fieldEdgeTypes);
-			}
-		}
-
-		for (int y = 0; y < pixelDistances.GetLength (0); y++) {
-			for (int x = pixelDistances.GetLength (1) - 1; x >= 0; x--) {
-				fieldDistance (y, x, 0, 1, false, pixelDistances, colorMap, fieldEdgeTypes);
-			}
-		}
-
-		for (int x = 0; x < pixelDistances.GetLength (1); x++) {
-			for (int y = 0; y < pixelDistances.GetLength (0); y++) {
 				fieldDistance (y, x, -1, 0, false, pixelDistances, colorMap, fieldEdgeTypes);
 			}
 		}
 
-		for (int x = 0; x < pixelDistances.GetLength (1); x++) {
-			for (int y = pixelDistances.GetLength (0) - 1; y >= 0; y--) {
+		for (int y = pixelDistances.GetLength (0) - 1; y >= 0; y--) {
+			for (int x = pixelDistances.GetLength (1) - 1; x >= 0; x--) {
+				fieldDistance (y, x, 0, 1, false, pixelDistances, colorMap, fieldEdgeTypes);
 				fieldDistance (y, x, 1, 0, false, pixelDistances, colorMap, fieldEdgeTypes);
 			}
 		}
-			
-		Debug.Log (pixelDistances[100, 100]);
-		Debug.Log (pixelDistances[300, 300]);
-		Debug.Log (pixelDistances[400, 400]);
+	}
+
+	public void setDistancesChess (float[,] pixelDistances, int[,] colorMap, int[,] fieldEdgeTypes)
+	{
+		Debug.Log ("Chess Distance");
+
+		for (int y = 0; y < pixelDistances.GetLength (0); y++) {
+			for (int x = 0; x < pixelDistances.GetLength (1); x++) {
+				fieldDistance (y, x, 0, -1, true, pixelDistances, colorMap, fieldEdgeTypes);
+				fieldDistance (y, x, -1, 1, false, pixelDistances, colorMap, fieldEdgeTypes);
+				fieldDistance (y, x, -1, 0, false, pixelDistances, colorMap, fieldEdgeTypes);
+				fieldDistance (y, x, -1, -1, false, pixelDistances, colorMap, fieldEdgeTypes);
+			}
+		}
+
+		for (int y = pixelDistances.GetLength (0) - 1; y >= 0; y--) {
+			for (int x = pixelDistances.GetLength (1) - 1; x >= 0; x--) {
+				fieldDistance (y, x, 0, 1, false, pixelDistances, colorMap, fieldEdgeTypes);
+				fieldDistance (y, x, 1, -1, false, pixelDistances, colorMap, fieldEdgeTypes);
+				fieldDistance (y, x, 1, 0, false, pixelDistances, colorMap, fieldEdgeTypes);
+				fieldDistance (y, x, 1, 1, false, pixelDistances, colorMap, fieldEdgeTypes);
+			}
+		}
 	}
 
 	private void fieldDistance (int y, int x, int movingY, int movingX, bool firstRun, 
@@ -161,21 +171,19 @@ public class ImageDistances
 			}
 		}
 
-		for (int y = 0; y < pixelDistances.GetLength (1); y++) {
-			for (int x = 0; x < pixelDistances.GetLength (0); x++) {
+		for (int x = 0; x < pixelDistances.GetLength (1); x++) {
+			for (int y = 0; y < pixelDistances.GetLength (0); y++) {
 				fieldDistanceVert (y, x, -1, pixelDistances, colorMap, fieldEdgeTypes);
 			}
 		}
 
-		for (int y = pixelDistances.GetLength (0) - 1; y >= 0; y--) {
-			for (int x = 0; x < pixelDistances.GetLength (0); x++) {
+		for (int x = 0; x < pixelDistances.GetLength (1); x++) {
+			for (int y = pixelDistances.GetLength (0) - 1; y >= 0; y--) {
 				fieldDistanceVert (y, x, 1, pixelDistances, colorMap, fieldEdgeTypes);
 			}
 		}
 			
-		Debug.Log (pixelDistances[100, 100]);
-		Debug.Log (pixelDistances[300, 300]);
-		Debug.Log (pixelDistances[400, 400]);
+		Debug.Log (System.Math.Pow(-10, 2));
 	}
 
 	//
@@ -188,7 +196,7 @@ public class ImageDistances
 	{
 		if (x == 0 || x == pixelDistances.GetLength (1) - 1) 
 		{
-			horiz [y, x] = 1;
+			horiz [y, x] = movingX;
 			vert [y, x] = 0;
 			pixelDistances [y, x] = 1;
 			fieldEdgeTypes [y, x] = colorMap [y, x];
@@ -198,7 +206,7 @@ public class ImageDistances
 		{
 			if (firstRun || pixelDistances [y, x] > pixelDistances [y, x + movingX])
 			{
-				horiz [y, x] = horiz [y, x + movingX] + 1;
+				horiz [y, x] = horiz [y, x + movingX] + movingX;
 				vert [y, x] = 0;
 				pixelDistances [y, x] = pixelDistances [y, x + movingX] + 1;
 				fieldEdgeTypes [y, x] = fieldEdgeTypes [y, x + movingX]; 
@@ -207,7 +215,7 @@ public class ImageDistances
 
 		else 
 		{
-			horiz [y, x] = 1;
+			horiz [y, x] = movingX;
 			vert [y, x] = 0;
 			pixelDistances [y, x] = 1;
 			fieldEdgeTypes [y, x] = colorMap [y, x + movingX];
@@ -223,9 +231,8 @@ public class ImageDistances
 		if (y == 0 || y == pixelDistances.GetLength (0) - 1) 
 		{
 			horiz [y, x] = 0;
-			vert [y, x] = 1;
+			vert [y, x] = movingY;
 			pixelDistances [y, x] = 1;
-
 			fieldEdgeTypes [y, x] = colorMap [y, x];
 		}
 
@@ -233,15 +240,9 @@ public class ImageDistances
 		{
 			if (pixelDistances [y, x] > pixelDistances [y + movingY, x])
 			{
+				vert [y, x] = vert [y + movingY, x] + movingY;
+				horiz [y, x] = horiz [y + movingY, x];
 
-				if (vert [y + movingY, x] > horiz [y + movingY, x]) {
-					vert [y, x] = vert [y + movingY, x] + 1;
-					horiz [y, x] = horiz [y + movingY, x];
-				} else {
-					vert [y, x] = vert [y + movingY, x];
-					horiz [y, x] = horiz [y + movingY, x]+1;
-
-				}
 				pixelDistances [y, x] = (float) System.Math.Sqrt (System.Math.Pow(vert[y, x], 2) + System.Math.Pow(horiz[y, x], 2));
 
 				fieldEdgeTypes [y, x] = fieldEdgeTypes [y + movingY, x]; 
@@ -250,12 +251,9 @@ public class ImageDistances
 
 		else 
 		{
-			if (horiz [y, x] != 1) 
-			{
-				horiz [y, x] = 0;
-				vert [y, x] = 1;
-				pixelDistances [y, x] = 1;
-			}
+			horiz [y, x] = 0;
+			vert [y, x] = movingY;
+			pixelDistances [y, x] = 1;
 			fieldEdgeTypes [y, x] = colorMap [y + movingY, x];
 		}
 	}

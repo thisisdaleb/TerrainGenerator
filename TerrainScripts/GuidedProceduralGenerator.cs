@@ -115,6 +115,7 @@ public class GuidedProceduralGenerator : MonoBehaviour
 		for (int smooth = 1; smooth < 3; smooth++) {
 			//smoothHeightMapPixels (smooth);
 		}
+		smoothHeightMapPixels (1);
 		//addNoise ();
 		createTerrain ();
 	}

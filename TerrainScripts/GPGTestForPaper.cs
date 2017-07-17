@@ -61,6 +61,7 @@ public class GPGTestForPaper : MonoBehaviour
 
 	void convertInputIntoMap ()
 	{
+		string[] lines = {"Times (in ms) for image of pixel width " + width, "First Time is:", "Second Time is:", "Third Time is:", "Fourth Time is:", "Fifth Time is:" };
 		runNow = false;
 
 		//creates matrix of all field types
@@ -69,28 +70,46 @@ public class GPGTestForPaper : MonoBehaviour
 		ImageDistances setImage = new ImageDistances ();
 		setImage.setColors (tex, width, length, pixelDistances, colorMap);
 		print ("starting Timer");
+
 		timer.Start ();
 		setImage.setDistances (pixelDistances, colorMap, fieldEdgeTypes);
-		print ("Time: " + timer.ElapsedMilliseconds);
+		lines[1] += " " + timer.ElapsedMilliseconds;
 
-		Debug.Log ("top left: " + pixelDistances [0, 0]);
-		Debug.Log ("one pixel over: " + pixelDistances [1, 0]);
-		Debug.Log (pixelDistances [pixelDistances.GetLength (0) - 1, 0]);
-		Debug.Log (pixelDistances [0, pixelDistances.GetLength (0) - 1]);
-		Debug.Log (pixelDistances [pixelDistances.GetLength (0) - 1, pixelDistances.GetLength (0) - 1]);
+		pixelDistances = new float[width, length];
+		fieldEdgeTypes = new   int[width, length];
+
+		timer.Reset ();
+		timer.Start ();
+		setImage.setDistances (pixelDistances, colorMap, fieldEdgeTypes);
+		lines[2] += " " + timer.ElapsedMilliseconds;
+
+		pixelDistances = new float[width, length];
+		fieldEdgeTypes = new   int[width, length];
+
+		timer.Reset ();
+		timer.Start ();
+		setImage.setDistances (pixelDistances, colorMap, fieldEdgeTypes);
+		lines[3] += " " + timer.ElapsedMilliseconds;
+
+		pixelDistances = new float[width, length];
+		fieldEdgeTypes = new   int[width, length];
+
+		timer.Reset ();
+		timer.Start ();
+		setImage.setDistances (pixelDistances, colorMap, fieldEdgeTypes);
+		lines[4] += " " + timer.ElapsedMilliseconds;
+
+		pixelDistances = new float[width, length];
+		fieldEdgeTypes = new   int[width, length];
+
+		timer.Reset ();
+		timer.Start ();
+		setImage.setDistances (pixelDistances, colorMap, fieldEdgeTypes);
+		lines[5] += " " + timer.ElapsedMilliseconds;
 
 		setImage.removeCornerPillars (pixelDistances);
 
-		Debug.Log ("top left: " + pixelDistances [0, 0]);
-		Debug.Log ("one pixel over: " + pixelDistances [1, 0]);
-		Debug.Log (pixelDistances [pixelDistances.GetLength (0) - 1, 0]);
-		Debug.Log (pixelDistances [0, pixelDistances.GetLength (0) - 1]);
-		Debug.Log (pixelDistances [pixelDistances.GetLength (0) - 1, pixelDistances.GetLength (0) - 1]);
-
-
-		//Now that we know the distances to a different field type for each pixel,
-		//we can finish up by creating the height map matrix
-		Debug.Log ("FINISHED");
+		System.IO.File.WriteAllLines(@"C:\Users\Daleb\Desktop\WriteLines.txt", lines);
 
 	}
 }
