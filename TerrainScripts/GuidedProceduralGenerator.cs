@@ -18,13 +18,16 @@ public class GuidedProceduralGenerator : MonoBehaviour
 	private SplatPrototype[] terrainTexs;	//set of textures used by map
 	private float waterSpace;				//percentage of map height used by water
 	private float fieldSpace;				//percentage of map height used by field
+	private System.Diagnostics.Stopwatch timer = new System.Diagnostics.Stopwatch ();
 
 
 	//public values that users can edit in GUI.
 	[Tooltip ("Checking this box starts the system")]
 	public bool runNow;
-	[Tooltip ("Checking this box uses Euclidean distance instead of manhatten")]
-	public bool Euclidean;
+	/*[Tooltip ("Checking this box uses euclidean distance instead of manhatten or chess")]
+	public bool Euclidean;*/
+	[Tooltip ("Checking this box uses chessboard distance instead of manhatten, but does not overried Euclidean box")]
+	public bool Chess;
 	[Tooltip ("The width in meters of the terrain")]
 	public int terrainWidthInMeters = 5000;
 	[Tooltip ("The length in meters of the terrain")]
@@ -39,10 +42,6 @@ public class GuidedProceduralGenerator : MonoBehaviour
 	public int fieldHeight = 40;
 	[Tooltip ("height of mountain section in meters")]
 	public int mountainHeight = 1500;
-	[Tooltip ("height of top half of field section in meters, unused currently")]
-	public float topHalfField = 20f;
-	[Tooltip ("height of bottom half field section in meters, unused currently")]
-	public float bottomHalfField = 20f;
 	[Tooltip ("How many pixels out does the top half of fields use?")]
 	public float topFieldLength = 75f;
 	[Tooltip ("How many pixels out does the bottom half of fields use?")]
@@ -88,7 +87,11 @@ public class GuidedProceduralGenerator : MonoBehaviour
 	{
 		//if the run button has been checked and there is a map image loaded 
 		if (runNow && tex != null) {
+			timer.Start ();
 			convertInputIntoMap ();
+			print ("Time: " + timer.ElapsedMilliseconds);
+			timer.Reset ();
+			print ("It made it to the end");
 			refreshVariables ();
 		}
 	}
@@ -102,8 +105,11 @@ public class GuidedProceduralGenerator : MonoBehaviour
 		//marks down which field type that pixel is closest to, and the number itself
 		ImageDistances setImage = new ImageDistances ();
 		setImage.setColors (tex, width, length, pixelDistances, colorMap);
-		if(Euclidean)
-			setImage.setDistancesEuclidean (pixelDistances, colorMap, fieldEdgeTypes);
+		/*if(Euclidean)
+			setImage.setDistancesDiag (pixelDistances, colorMap, fieldEdgeTypes);
+		else*/
+		if(Chess)
+			setImage.setDistancesChess (pixelDistances, colorMap, fieldEdgeTypes);
 		else
 			setImage.setDistances (pixelDistances, colorMap, fieldEdgeTypes);
 		setImage.removeCornerPillars (pixelDistances);
@@ -113,10 +119,11 @@ public class GuidedProceduralGenerator : MonoBehaviour
 		createFloatMatrix ();
 		setAllHeightPointsToBeBetweenZeroAndOne ();
 		for (int smooth = 1; smooth < 3; smooth++) {
-			//smoothHeightMapPixels (smooth);
+			smoothHeightMapPixels (smooth);
 		}
-		smoothHeightMapPixels (1);
-		//addNoise ();
+		//smoothHeightMapPixels (1);
+		addNoise ();
+		addNoise ();
 		createTerrain ();
 	}
 
@@ -324,7 +331,6 @@ public class GuidedProceduralGenerator : MonoBehaviour
 		go.GetComponent<Terrain> ().detailObjectDistance = 200;
 		go.GetComponent<Terrain> ().detailObjectDensity = 1F;
 		go.transform.position.Set (0, 0, 0);
-		print ("It made it to the end");
 	}
 
 	private float smoothInterpolate (float a, float b, float x)

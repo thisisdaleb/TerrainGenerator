@@ -2,6 +2,8 @@
 using System.Collections;
 using System.Linq; // used for Sum of array
 
+//https://alastaira.wordpress.com/2013/11/14/procedural-terrain-splatmapping/
+
 public class SplatMapCreator {
 	
 	public void startTerrainPlacing(TerrainData terrainData, bool fourthTexture, float waterTop, float fieldTop, int[,] colorMap, int ground){

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Linq;
 
  // used for Sum of array
+ // https://alastaira.wordpress.com/2013/11/14/procedural-terrain-splatmapping/
 
 public class GrassCreator
 {
